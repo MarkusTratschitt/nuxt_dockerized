@@ -25,7 +25,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom Nginx configuration
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx.conf /app/nginx/nginx.conf
 
 # Copy the self-signed SSL certificate and key
 COPY ./selfsigned.crt /etc/nginx/ssl/selfsigned.crt
