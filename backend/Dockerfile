@@ -12,10 +12,10 @@ RUN npm install
 COPY . .
 
 # Copy the entrypoint script into the container
-COPY entrypoint.sh /app/entrypoint.sh
+COPY entrypoint.sh ./entrypoint.sh
 
 # Make the entrypoint script executable
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 # Expose the port on which the API will run
 EXPOSE 8000
