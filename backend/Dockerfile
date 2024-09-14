@@ -11,6 +11,9 @@ RUN npm install
 # Copy project files
 COPY . .
 
+# Build the project
+RUN npm run build
+
 # Copy the entrypoint script into the container
 COPY entrypoint.sh /entrypoint.sh
 
