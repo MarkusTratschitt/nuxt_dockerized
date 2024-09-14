@@ -322,3 +322,6 @@ const prisma = new PrismaClient()
 
 export default prisma
 ```
+
+I had to generate `prisma` later again, because of a problem with the path i added to a Dockerfile.
+
