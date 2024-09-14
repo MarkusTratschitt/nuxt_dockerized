@@ -1,5 +1,3 @@
-# backend/Dockerfile
-
 # Base image
 FROM node:lts-alpine
 
@@ -7,7 +5,7 @@ FROM node:lts-alpine
 WORKDIR /app
 
 # Install dependencies
-COPY ./package*.json ./
+COPY package*.json ./
 RUN npm install
 
 # Copy project files
