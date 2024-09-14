@@ -1,8 +1,9 @@
 {
-  "name": "nuxt-app",
+  "name": "backend",
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "nuxt start",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
