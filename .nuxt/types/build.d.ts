@@ -11,7 +11,7 @@ declare module "#build/paths.mjs";
 declare module "#build/root-component.mjs";
 declare module "#build/plugins/server.mjs";
 declare module "#build/test-component-wrapper.mjs";
-declare module "#build/devtools/settings.mjs";
+declare module "#build/image-options.mjs";
 declare module "#build/pages.mjs";
 declare module "#build/unhead-plugins.mjs";
 declare module "#build/unhead.config.mjs";
