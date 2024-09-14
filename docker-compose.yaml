@@ -3,12 +3,11 @@ version: '3.8'
 services:
   # Frontend (Nuxt + Nginx)
   frontend:
-    build: ./app  # Erstelle das Frontend-Image mit Nginx
+    build: ./app  # Baue das Frontend-Image mit Nginx
     container_name: frontend_nginx
     ports:
       - "80:80"
-    volumes:
-      - ./app/dist:/usr/share/nginx/html  # Statische Dateien aus dem Nuxt-Build
+      - "443:443"
     networks:
       - app-network
 
@@ -27,7 +26,7 @@ services:
     env_file:
       - .env
 
-  # MySQL Datenbank
+  # MySQL-Datenbank
   db:
     image: mysql:8.0
     container_name: mysql_db
