@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   # Frontend (Nuxt + Nginx)
   frontend:
-    build: ./app  # Baue das Frontend-Image mit Nginx
+    build:
+      context: ./app/frontend  # Korrektes Verzeichnis für das Frontend
     container_name: frontend_nginx
     ports:
       - "80:80"
@@ -13,12 +12,12 @@ services:
 
   # Backend (Node.js API mit Prisma)
   backend:
-    build: ./backend
+    build: ./app/backend  # Korrektes Verzeichnis für das Backend
     container_name: backend
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./app/backend:/app
     networks:
       - app-network
     depends_on:
@@ -26,7 +25,7 @@ services:
     env_file:
       - .env
 
-  # MySQL-Datenbank
+  # MySQL Datenbank
   db:
     image: mysql:8.0
     container_name: mysql_db
