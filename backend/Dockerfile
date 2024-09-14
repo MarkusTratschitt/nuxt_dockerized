@@ -14,6 +14,9 @@ COPY . .
 # Copy the entrypoint script into the container
 COPY entrypoint.sh /entrypoint.sh
 
+# Copy Prisma schema (ensure it's in the correct folder)
+COPY prisma/schema.prisma prisma/schema.prisma
+
 # Make the entrypoint script executable
 RUN chmod +x /entrypoint.sh
 
