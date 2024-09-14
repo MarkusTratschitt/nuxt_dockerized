@@ -21,4 +21,4 @@ RUN chmod +x ./entrypoint.sh
 EXPOSE 8000
 
 # Use the entrypoint script
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/frontend/entrypoint.sh"]
