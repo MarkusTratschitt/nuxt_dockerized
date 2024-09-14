@@ -1,0 +1,73 @@
+-- Erstellen der Tabelle MITARBEITER
+CREATE TABLE IF NOT EXISTS MITARBEITER (
+    Mitarbeiter_ID INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    Mitarbeiter_Vorname VARCHAR(50) NOT NULL,
+    Mitarbeiter_Name VARCHAR(50) NOT NULL,
+    Mitarbeiter_Rolle VARCHAR(50) NOT NULL
+);
+
+-- Erstellen der Tabelle KUNDE
+CREATE TABLE IF NOT EXISTS KUNDE (
+    Kunde_ID INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    Kunde_Marktnummer VARCHAR(50) NOT NULL,
+    Kunde_Strasse VARCHAR(100) NOT NULL,
+    Kunde_Hausnummer VARCHAR(10) NOT NULL,
+    Kunde_PLZ VARCHAR(10) NOT NULL,
+    Kunde_Ort VARCHAR(100) NOT NULL
+);
+
+-- Erstellen der Tabelle AUFTRAG
+CREATE TABLE IF NOT EXISTS AUFTRAG (
+    Auftrag_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Kunde_ID INT,
+    Mitarbeiter_ID INT,
+    Status VARCHAR(100) NOT NULL,
+    KW VARCHAR(10) NOT NULL,
+    Installation_geplant DATE,
+    Installation_Tag DATE,
+    Abbruchdatum DATE,
+    Kabeltausch_erledigt BOOLEAN DEFAULT FALSE,
+    Problemfall BOOLEAN DEFAULT FALSE,
+    Abschluss_Techniker BOOLEAN DEFAULT FALSE,
+    Abschluss_Buero BOOLEAN DEFAULT FALSE,
+    Unterschrift_Kunde VARCHAR(255),
+    Unterschrift_Techniker VARCHAR(255),
+    FOREIGN KEY (Kunde_ID) REFERENCES KUNDE(Kunde_ID) ON DELETE SET NULL,
+    FOREIGN KEY (Mitarbeiter_ID) REFERENCES MITARBEITER(Mitarbeiter_ID) ON DELETE SET NULL
+);
+
+-- Erstellen der Tabelle PAKET
+CREATE TABLE IF NOT EXISTS PAKET (
+    Paket_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Kunde_ID INT,
+    Status VARCHAR(100) NOT NULL,
+    FOREIGN KEY (Kunde_ID) REFERENCES KUNDE(Kunde_ID) ON DELETE SET NULL
+);
+
+-- Erstellen der Tabelle GERAET
+CREATE TABLE IF NOT EXISTS GERAET (
+    Geraet_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Kunde_ID INT,
+    Typ VARCHAR(100) NOT NULL,
+    Status VARCHAR(100) NOT NULL,
+    FOREIGN KEY (Kunde_ID) REFERENCES KUNDE(Kunde_ID) ON DELETE SET NULL
+);
+
+-- Erstellen der Tabelle ROUTE
+CREATE TABLE IF NOT EXISTS ROUTE (
+    Route_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Mitarbeiter_ID INT,
+    Auftrag_ID INT,
+    Installation_Tag DATE NOT NULL,
+    FOREIGN KEY (Mitarbeiter_ID) REFERENCES MITARBEITER(Mitarbeiter_ID) ON DELETE SET NULL,
+    FOREIGN KEY (Auftrag_ID) REFERENCES AUFTRAG(Auftrag_ID) ON DELETE CASCADE
+);
+
+-- Erstellen der Tabelle KOMMENTAR
+CREATE TABLE IF NOT EXISTS KOMMENTAR (
+    Kommentar_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Auftrag_ID INT,
+    Problemfall_Kommentar TEXT NOT NULL,
+    Kommentar_Datum DATE NOT NULL,
+    FOREIGN KEY (Auftrag_ID) REFERENCES AUFTRAG(Auftrag_ID) ON DELETE CASCADE
+);

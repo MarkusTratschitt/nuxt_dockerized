@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Define the Prisma Client generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define the database connection
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Mitarbeiter model
+model Mitarbeiter {
+  Mitarbeiter_ID    Int      @id @default(autoincrement())
+  Mitarbeiter_Vorname String
+  Mitarbeiter_Name  String
+  Mitarbeiter_Rolle String
+  Auftraege         Auftrag[]
+  Routen            Route[]
+}
+
+// Kunde model
+model Kunde {
+  Kunde_ID        Int      @id @default(autoincrement())
+  Kunde_Marktnummer String
+  Kunde_Strasse   String
+  Kunde_Hausnummer String
+  Kunde_PLZ       String
+  Kunde_Ort       String
+  Auftraege       Auftrag[]
+  Pakete          Paket[]
+  Geraete         Geraet[]
+}
+
+// Auftrag model
+model Auftrag {
+  Auftrag_ID         Int      @id @default(autoincrement())
+  Kunde_ID           Int?
+  Mitarbeiter_ID     Int?
+  Status             String
+  KW                 String
+  Installation_geplant DateTime?
+  Installation_Tag   DateTime?
+  Abbruchdatum       DateTime?
+  Kabeltausch_erledigt Boolean @default(false)
+  Problemfall        Boolean @default(false)
+  Abschluss_Techniker Boolean @default(false)
+  Abschluss_Buero    Boolean @default(false)
+  Unterschrift_Kunde String?
+  Unterschrift_Techniker String?
+  Kunde              Kunde?   @relation(fields: [Kunde_ID], references: [Kunde_ID])
+  Mitarbeiter        Mitarbeiter? @relation(fields: [Mitarbeiter_ID], references: [Mitarbeiter_ID])
+  Kommentare         Kommentar[]
+  Routen             Route[]
+}
+
+// Paket model
+model Paket {
+  Paket_ID  Int      @id @default(autoincrement())
+  Kunde_ID  Int?
+  Status    String
+  Kunde     Kunde?   @relation(fields: [Kunde_ID], references: [Kunde_ID])
+}
+
+// Geraet model
+model Geraet {
+  Geraet_ID Int      @id @default(autoincrement())
+  Kunde_ID  Int?
+  Typ       String
+  Status    String
+  Kunde     Kunde?   @relation(fields: [Kunde_ID], references: [Kunde_ID])
+}
+
+// Route model
+model Route {
+  Route_ID         Int      @id @default(autoincrement())
+  Mitarbeiter_ID   Int?
+  Auftrag_ID       Int?
+  Installation_Tag DateTime
+  Mitarbeiter      Mitarbeiter? @relation(fields: [Mitarbeiter_ID], references: [Mitarbeiter_ID])
+  Auftrag          Auftrag?   @relation(fields: [Auftrag_ID], references: [Auftrag_ID], onDelete: Cascade)
+}
+
+// Kommentar model
+model Kommentar {
+  Kommentar_ID           Int      @id @default(autoincrement())
+  Auftrag_ID             Int?
+  Problemfall_Kommentar  String
+  Kommentar_Datum        DateTime
+  Auftrag                Auftrag? @relation(fields: [Auftrag_ID], references: [Auftrag_ID], onDelete: Cascade)
+}
