@@ -1,10 +1,13 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import http, { Server as Server$1 } from 'node:http';
 import https, { Server } from 'node:https';
+import { LRUCache } from 'lru-cache';
 import { promises, existsSync } from 'node:fs';
 import { dirname as dirname$1, resolve as resolve$1, join } from 'node:path';
+import nodeCrypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { getIcons } from '@iconify/utils';
 import { createConsola as createConsola$1 } from 'consola/core';
+import { FilterXSS } from 'xss';
 import { ipxFSStorage, ipxHttpStorage, createIPX, createIPXH3Handler } from 'ipx';
 
 const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
@@ -2040,6 +2043,84 @@ function isError(input) {
   return input?.constructor?.__h3_error__ === true;
 }
 
+function parse(multipartBodyBuffer, boundary) {
+  let lastline = "";
+  let state = 0 /* INIT */;
+  let buffer = [];
+  const allParts = [];
+  let currentPartHeaders = [];
+  for (let i = 0; i < multipartBodyBuffer.length; i++) {
+    const prevByte = i > 0 ? multipartBodyBuffer[i - 1] : null;
+    const currByte = multipartBodyBuffer[i];
+    const newLineChar = currByte === 10 || currByte === 13;
+    if (!newLineChar) {
+      lastline += String.fromCodePoint(currByte);
+    }
+    const newLineDetected = currByte === 10 && prevByte === 13;
+    if (0 /* INIT */ === state && newLineDetected) {
+      if ("--" + boundary === lastline) {
+        state = 1 /* READING_HEADERS */;
+      }
+      lastline = "";
+    } else if (1 /* READING_HEADERS */ === state && newLineDetected) {
+      if (lastline.length > 0) {
+        const i2 = lastline.indexOf(":");
+        if (i2 > 0) {
+          const name = lastline.slice(0, i2).toLowerCase();
+          const value = lastline.slice(i2 + 1).trim();
+          currentPartHeaders.push([name, value]);
+        }
+      } else {
+        state = 2 /* READING_DATA */;
+        buffer = [];
+      }
+      lastline = "";
+    } else if (2 /* READING_DATA */ === state) {
+      if (lastline.length > boundary.length + 4) {
+        lastline = "";
+      }
+      if ("--" + boundary === lastline) {
+        const j = buffer.length - lastline.length;
+        const part = buffer.slice(0, j - 1);
+        allParts.push(process$1(part, currentPartHeaders));
+        buffer = [];
+        currentPartHeaders = [];
+        lastline = "";
+        state = 3 /* READING_PART_SEPARATOR */;
+      } else {
+        buffer.push(currByte);
+      }
+      if (newLineDetected) {
+        lastline = "";
+      }
+    } else if (3 /* READING_PART_SEPARATOR */ === state && newLineDetected) {
+      state = 1 /* READING_HEADERS */;
+    }
+  }
+  return allParts;
+}
+function process$1(data, headers) {
+  const dataObj = {};
+  const contentDispositionHeader = headers.find((h) => h[0] === "content-disposition")?.[1] || "";
+  for (const i of contentDispositionHeader.split(";")) {
+    const s = i.split("=");
+    if (s.length !== 2) {
+      continue;
+    }
+    const key = (s[0] || "").trim();
+    if (key === "name" || key === "filename") {
+      const _value = (s[1] || "").trim().replace(/"/g, "");
+      dataObj[key] = Buffer.from(_value, "latin1").toString("utf8");
+    }
+  }
+  const contentType = headers.find((h) => h[0] === "content-type")?.[1] || "";
+  if (contentType) {
+    dataObj.type = contentType;
+  }
+  dataObj.data = Buffer.from(data);
+  return dataObj;
+}
+
 function getQuery(event) {
   return getQuery$1(event.path || "");
 }
@@ -2074,8 +2155,23 @@ function getRequestHeader(event, name) {
   const value = headers[name.toLowerCase()];
   return value;
 }
+function getRequestIP(event, opts = {}) {
+  if (event.context.clientAddress) {
+    return event.context.clientAddress;
+  }
+  if (opts.xForwardedFor) {
+    const xForwardedFor = getRequestHeader(event, "x-forwarded-for")?.split(",").shift()?.trim();
+    if (xForwardedFor) {
+      return xForwardedFor;
+    }
+  }
+  if (event.node.req.socket.remoteAddress) {
+    return event.node.req.socket.remoteAddress;
+  }
+}
 
 const RawBodySymbol = Symbol.for("h3RawBody");
+const ParsedBodySymbol = Symbol.for("h3ParsedBody");
 const PayloadMethods$1 = ["PATCH", "POST", "PUT", "DELETE"];
 function readRawBody(event, encoding = "utf8") {
   assertMethod(event, PayloadMethods$1);
@@ -2137,6 +2233,41 @@ function readRawBody(event, encoding = "utf8") {
   const result = encoding ? promise.then((buff) => buff.toString(encoding)) : promise;
   return result;
 }
+async function readBody(event, options = {}) {
+  const request = event.node.req;
+  if (hasProp(request, ParsedBodySymbol)) {
+    return request[ParsedBodySymbol];
+  }
+  const contentType = request.headers["content-type"] || "";
+  const body = await readRawBody(event);
+  let parsed;
+  if (contentType === "application/json") {
+    parsed = _parseJSON(body, options.strict ?? true);
+  } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+    parsed = _parseURLEncodedBody(body);
+  } else if (contentType.startsWith("text/")) {
+    parsed = body;
+  } else {
+    parsed = _parseJSON(body, options.strict ?? false);
+  }
+  request[ParsedBodySymbol] = parsed;
+  return parsed;
+}
+async function readMultipartFormData(event) {
+  const contentType = getRequestHeader(event, "content-type");
+  if (!contentType || !contentType.startsWith("multipart/form-data")) {
+    return;
+  }
+  const boundary = contentType.match(/boundary=([^;]*)(;|$)/i)?.[1];
+  if (!boundary) {
+    return;
+  }
+  const body = await readRawBody(event, false);
+  if (!body) {
+    return;
+  }
+  return parse(body, boundary);
+}
 function getRequestWebStream(event) {
   if (!PayloadMethods$1.includes(event.method)) {
     return;
@@ -2170,6 +2301,35 @@ function getRequestWebStream(event) {
       });
     }
   });
+}
+function _parseJSON(body = "", strict) {
+  if (!body) {
+    return void 0;
+  }
+  try {
+    return destr(body, { strict });
+  } catch {
+    throw createError$1({
+      statusCode: 400,
+      statusMessage: "Bad Request",
+      message: "Invalid JSON body"
+    });
+  }
+}
+function _parseURLEncodedBody(body) {
+  const form = new URLSearchParams(body);
+  const parsedForm = /* @__PURE__ */ Object.create(null);
+  for (const [key, value] of form.entries()) {
+    if (hasProp(parsedForm, key)) {
+      if (!Array.isArray(parsedForm[key])) {
+        parsedForm[key] = [parsedForm[key]];
+      }
+      parsedForm[key].push(value);
+    } else {
+      parsedForm[key] = value;
+    }
+  }
+  return parsedForm;
 }
 
 function handleCacheHeaders(event, opts) {
@@ -2356,6 +2516,23 @@ const setHeaders = setResponseHeaders;
 function setResponseHeader(event, name, value) {
   event.node.res.setHeader(name, value);
 }
+function appendResponseHeaders(event, headers) {
+  for (const [name, value] of Object.entries(headers)) {
+    appendResponseHeader(event, name, value);
+  }
+}
+const appendHeaders = appendResponseHeaders;
+function appendResponseHeader(event, name, value) {
+  let current = event.node.res.getHeader(name);
+  if (!current) {
+    event.node.res.setHeader(name, value);
+    return;
+  }
+  if (!Array.isArray(current)) {
+    current = [current.toString()];
+  }
+  event.node.res.setHeader(name, [...current, value]);
+}
 function removeResponseHeader(event, name) {
   return event.node.res.removeHeader(name);
 }
@@ -2445,6 +2622,119 @@ function sendWebResponse(event, response) {
     return;
   }
   return sendStream(event, response.body);
+}
+
+function resolveCorsOptions(options = {}) {
+  const defaultOptions = {
+    origin: "*",
+    methods: "*",
+    allowHeaders: "*",
+    exposeHeaders: "*",
+    credentials: false,
+    maxAge: false,
+    preflight: {
+      statusCode: 204
+    }
+  };
+  return defu(options, defaultOptions);
+}
+function isPreflightRequest(event) {
+  const origin = getRequestHeader(event, "origin");
+  const accessControlRequestMethod = getRequestHeader(
+    event,
+    "access-control-request-method"
+  );
+  return event.method === "OPTIONS" && !!origin && !!accessControlRequestMethod;
+}
+function isCorsOriginAllowed(origin, options) {
+  const { origin: originOption } = options;
+  if (!origin || !originOption || originOption === "*" || originOption === "null") {
+    return true;
+  }
+  if (Array.isArray(originOption)) {
+    return originOption.some((_origin) => {
+      if (_origin instanceof RegExp) {
+        return _origin.test(origin);
+      }
+      return origin === _origin;
+    });
+  }
+  return originOption(origin);
+}
+function createOriginHeaders(event, options) {
+  const { origin: originOption } = options;
+  const origin = getRequestHeader(event, "origin");
+  if (!origin || !originOption || originOption === "*") {
+    return { "access-control-allow-origin": "*" };
+  }
+  if (typeof originOption === "string") {
+    return { "access-control-allow-origin": originOption, vary: "origin" };
+  }
+  return isCorsOriginAllowed(origin, options) ? { "access-control-allow-origin": origin, vary: "origin" } : {};
+}
+function createMethodsHeaders(options) {
+  const { methods } = options;
+  if (!methods) {
+    return {};
+  }
+  if (methods === "*") {
+    return { "access-control-allow-methods": "*" };
+  }
+  return methods.length > 0 ? { "access-control-allow-methods": methods.join(",") } : {};
+}
+function createCredentialsHeaders(options) {
+  const { credentials } = options;
+  if (credentials) {
+    return { "access-control-allow-credentials": "true" };
+  }
+  return {};
+}
+function createAllowHeaderHeaders(event, options) {
+  const { allowHeaders } = options;
+  if (!allowHeaders || allowHeaders === "*" || allowHeaders.length === 0) {
+    const header = getRequestHeader(event, "access-control-request-headers");
+    return header ? {
+      "access-control-allow-headers": header,
+      vary: "access-control-request-headers"
+    } : {};
+  }
+  return {
+    "access-control-allow-headers": allowHeaders.join(","),
+    vary: "access-control-request-headers"
+  };
+}
+function createExposeHeaders(options) {
+  const { exposeHeaders } = options;
+  if (!exposeHeaders) {
+    return {};
+  }
+  if (exposeHeaders === "*") {
+    return { "access-control-expose-headers": exposeHeaders };
+  }
+  return { "access-control-expose-headers": exposeHeaders.join(",") };
+}
+function appendCorsPreflightHeaders(event, options) {
+  appendHeaders(event, createOriginHeaders(event, options));
+  appendHeaders(event, createCredentialsHeaders(options));
+  appendHeaders(event, createExposeHeaders(options));
+  appendHeaders(event, createMethodsHeaders(options));
+  appendHeaders(event, createAllowHeaderHeaders(event, options));
+}
+function appendCorsHeaders(event, options) {
+  appendHeaders(event, createOriginHeaders(event, options));
+  appendHeaders(event, createCredentialsHeaders(options));
+  appendHeaders(event, createExposeHeaders(options));
+}
+
+function handleCors(event, options) {
+  const _options = resolveCorsOptions(options);
+  if (isPreflightRequest(event)) {
+    appendCorsPreflightHeaders(event, options);
+    sendNoContent(event, _options.preflight.statusCode);
+    return true;
+  }
+  appendCorsHeaders(event, options);
+  return false;
 }
 
 const PayloadMethods = /* @__PURE__ */ new Set(["PATCH", "POST", "PUT", "DELETE"]);
@@ -4134,7 +4424,7 @@ const appConfig = defuFn(appConfig0, inlineAppConfig);
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "5490dbbb-de6b-45fb-9bf6-ba4cf7f01a2f",
+    "buildId": "836d03ea-23de-48ce-af68-3f0507847f87",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4143,6 +4433,17 @@ const _inlineRuntimeConfig = {
     "routeRules": {
       "/__nuxt_error": {
         "cache": false
+      },
+      "/**": {
+        "headers": {
+          "Referrer-Policy": "no-referrer",
+          "Strict-Transport-Security": "max-age=15552000; includeSubDomains;",
+          "X-Content-Type-Options": "nosniff",
+          "X-Download-Options": "noopen",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Permitted-Cross-Domain-Policies": "none",
+          "X-XSS-Protection": "0"
+        }
       },
       "/_nuxt/builds/meta/**": {
         "headers": {
@@ -4164,6 +4465,141 @@ const _inlineRuntimeConfig = {
   "public": {},
   "icon": {
     "serverKnownCssClasses": []
+  },
+  "private": {
+    "basicAuth": false
+  },
+  "security": {
+    "strict": false,
+    "headers": {
+      "crossOriginResourcePolicy": "same-origin",
+      "crossOriginOpenerPolicy": "same-origin",
+      "crossOriginEmbedderPolicy": "credentialless",
+      "contentSecurityPolicy": {
+        "base-uri": [
+          "'none'"
+        ],
+        "font-src": [
+          "'self'",
+          "https:",
+          "data:"
+        ],
+        "form-action": [
+          "'self'"
+        ],
+        "frame-ancestors": [
+          "'self'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "script-src-attr": [
+          "'none'"
+        ],
+        "style-src": [
+          "'self'",
+          "https:",
+          "'unsafe-inline'"
+        ],
+        "script-src": [
+          "'self'",
+          "https:",
+          "'unsafe-inline'",
+          "'strict-dynamic'",
+          "'nonce-{{nonce}}'"
+        ],
+        "upgrade-insecure-requests": true
+      },
+      "originAgentCluster": "?1",
+      "referrerPolicy": "no-referrer",
+      "strictTransportSecurity": {
+        "maxAge": 15552000,
+        "includeSubdomains": true
+      },
+      "xContentTypeOptions": "nosniff",
+      "xDNSPrefetchControl": "off",
+      "xDownloadOptions": "noopen",
+      "xFrameOptions": "SAMEORIGIN",
+      "xPermittedCrossDomainPolicies": "none",
+      "xXSSProtection": "0",
+      "permissionsPolicy": {
+        "camera": [],
+        "display-capture": [],
+        "fullscreen": [],
+        "geolocation": [],
+        "microphone": []
+      }
+    },
+    "requestSizeLimiter": {
+      "maxRequestSizeInBytes": 2000000,
+      "maxUploadFileRequestInBytes": 8000000,
+      "throwError": true
+    },
+    "rateLimiter": {
+      "tokensPerInterval": 150,
+      "interval": 300000,
+      "headers": false,
+      "driver": {
+        "name": "lruCache"
+      },
+      "throwError": true
+    },
+    "xssValidator": {
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "throwError": true
+    },
+    "corsHandler": {
+      "origin": "http://localhost:3000",
+      "methods": [
+        "GET",
+        "HEAD",
+        "PUT",
+        "PATCH",
+        "POST",
+        "DELETE"
+      ],
+      "preflight": {
+        "statusCode": 204
+      }
+    },
+    "allowedMethodsRestricter": {
+      "methods": "*",
+      "throwError": true
+    },
+    "hidePoweredBy": true,
+    "enabled": true,
+    "csrf": false,
+    "nonce": true,
+    "removeLoggers": {
+      "external": [],
+      "consoleType": [
+        "log",
+        "debug"
+      ],
+      "include": [
+        {},
+        {}
+      ],
+      "exclude": [
+        {},
+        {}
+      ]
+    },
+    "ssg": {
+      "meta": true,
+      "hashScripts": true,
+      "hashStyles": false,
+      "nitroHeaders": true,
+      "exportToPresets": true
+    },
+    "sri": true
   },
   "ipx": {
     "baseURL": "/_ipx",
@@ -4331,11 +4767,11 @@ function defineDriver$1(factory) {
   return factory;
 }
 
-const DRIVER_NAME$1 = "memory";
+const DRIVER_NAME$2 = "memory";
 const memory = defineDriver$1(() => {
   const data = /* @__PURE__ */ new Map();
   return {
-    name: DRIVER_NAME$1,
+    name: DRIVER_NAME$2,
     getInstance: () => data,
     hasItem(key) {
       return data.has(key);
@@ -4809,6 +5245,62 @@ function createRequiredError(driver, name) {
   return createError(driver, `Missing required option \`${name}\`.`);
 }
 
+const DRIVER_NAME$1 = "lru-cache";
+const unstorage_47drivers_47lru_45cache = defineDriver((opts = {}) => {
+  const cache = new LRUCache({
+    max: 1e3,
+    sizeCalculation: opts.maxSize || opts.maxEntrySize ? (value, key) => {
+      return key.length + byteLength(value);
+    } : void 0,
+    ...opts
+  });
+  return {
+    name: DRIVER_NAME$1,
+    options: opts,
+    getInstance: () => cache,
+    hasItem(key) {
+      return cache.has(key);
+    },
+    getItem(key) {
+      return cache.get(key) ?? null;
+    },
+    getItemRaw(key) {
+      return cache.get(key) ?? null;
+    },
+    setItem(key, value) {
+      cache.set(key, value);
+    },
+    setItemRaw(key, value) {
+      cache.set(key, value);
+    },
+    removeItem(key) {
+      cache.delete(key);
+    },
+    getKeys() {
+      return [...cache.keys()];
+    },
+    clear() {
+      cache.clear();
+    },
+    dispose() {
+      cache.clear();
+    }
+  };
+});
+function byteLength(value) {
+  if (typeof Buffer !== "undefined") {
+    try {
+      return Buffer.byteLength(value);
+    } catch {
+    }
+  }
+  try {
+    return typeof value === "string" ? value.length : JSON.stringify(value).length;
+  } catch {
+  }
+  return 0;
+}
+
 function ignoreNotfound(err) {
   return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
 }
@@ -4933,14 +5425,15 @@ const unstorage_47drivers_47fs_45lite = defineDriver((opts = {}) => {
   };
 });
 
-const storage = createStorage({});
+const storage$1 = createStorage({});
 
-storage.mount('/assets', assets$1);
+storage$1.mount('/assets', assets$1);
 
-storage.mount('data', unstorage_47drivers_47fs_45lite({"driver":"fsLite","base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.data/kv"}));
+storage$1.mount('#rate-limiter-storage', unstorage_47drivers_47lru_45cache({"driver":"lruCache"}));
+storage$1.mount('data', unstorage_47drivers_47fs_45lite({"driver":"fsLite","base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.data/kv"}));
 
 function useStorage(base = "") {
-  return base ? prefixStorage(storage, base) : storage;
+  return base ? prefixStorage(storage$1, base) : storage$1;
 }
 
 const defaultCacheOptions = {
@@ -5376,8 +5869,410 @@ function getRouteRulesForPath(path) {
   return defu({}, ..._routeRulesMatcher.matchAll(path).reverse());
 }
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const defuReplaceArray = createDefu((obj, key, value) => {
+  if (Array.isArray(obj[key]) || Array.isArray(value)) {
+    obj[key] = value;
+    return true;
+  }
+});
+
+const nitroAppSecurityOptions = {};
+function getAppSecurityOptions() {
+  return nitroAppSecurityOptions;
+}
+function resolveSecurityRules(event) {
+  if (!event.context.security) {
+    event.context.security = {};
+  }
+  if (!event.context.security.rules) {
+    const router = createRouter$1({ routes: structuredClone(nitroAppSecurityOptions) });
+    const matcher = toRouteMatcher(router);
+    const matches = matcher.matchAll(event.path.split("?")[0]);
+    const rules = defuReplaceArray({}, ...matches.reverse());
+    event.context.security.rules = rules;
+  }
+  return event.context.security.rules;
+}
+function resolveSecurityRoute(event) {
+  if (!event.context.security) {
+    event.context.security = {};
+  }
+  if (!event.context.security.route) {
+    const routeNames = Object.fromEntries(Object.entries(nitroAppSecurityOptions).map(([name]) => [name, { name }]));
+    const router = createRouter$1({ routes: routeNames });
+    const match = router.lookup(event.path.split("?")[0]);
+    const route = match?.name ?? "";
+    event.context.security.route = route;
+  }
+  return event.context.security.route;
+}
+
+const KEYS_TO_NAMES = {
+  contentSecurityPolicy: "Content-Security-Policy",
+  crossOriginEmbedderPolicy: "Cross-Origin-Embedder-Policy",
+  crossOriginOpenerPolicy: "Cross-Origin-Opener-Policy",
+  crossOriginResourcePolicy: "Cross-Origin-Resource-Policy",
+  originAgentCluster: "Origin-Agent-Cluster",
+  referrerPolicy: "Referrer-Policy",
+  strictTransportSecurity: "Strict-Transport-Security",
+  xContentTypeOptions: "X-Content-Type-Options",
+  xDNSPrefetchControl: "X-DNS-Prefetch-Control",
+  xDownloadOptions: "X-Download-Options",
+  xFrameOptions: "X-Frame-Options",
+  xPermittedCrossDomainPolicies: "X-Permitted-Cross-Domain-Policies",
+  xXSSProtection: "X-XSS-Protection",
+  permissionsPolicy: "Permissions-Policy"
+};
+const NAMES_TO_KEYS = Object.fromEntries(Object.entries(KEYS_TO_NAMES).map(([key, name]) => [name, key]));
+function getNameFromKey(key) {
+  return KEYS_TO_NAMES[key];
+}
+function getKeyFromName(headerName) {
+  const [, key] = Object.entries(NAMES_TO_KEYS).find(([name]) => name.toLowerCase() === headerName.toLowerCase()) || [];
+  return key;
+}
+function headerStringFromObject(optionKey, optionValue) {
+  if (optionValue === false) {
+    return "";
+  }
+  if (optionKey === "contentSecurityPolicy") {
+    const policies = optionValue;
+    return Object.entries(policies).filter(([, value]) => value !== false).map(([directive, sources]) => {
+      if (directive === "upgrade-insecure-requests") {
+        return "upgrade-insecure-requests;";
+      } else {
+        const stringifiedSources = typeof sources === "string" ? sources : sources.map((source) => source.trim()).join(" ");
+        return `${directive} ${stringifiedSources};`;
+      }
+    }).join(" ");
+  } else if (optionKey === "strictTransportSecurity") {
+    const policies = optionValue;
+    return [
+      `max-age=${policies.maxAge};`,
+      policies.includeSubdomains && "includeSubDomains;",
+      policies.preload && "preload;"
+    ].filter(Boolean).join(" ");
+  } else if (optionKey === "permissionsPolicy") {
+    const policies = optionValue;
+    return Object.entries(policies).filter(([, value]) => value !== false).map(([directive, sources]) => {
+      if (typeof sources === "string") {
+        return `${directive}=${sources}`;
+      } else {
+        return `${directive}=(${sources.join(" ")})`;
+      }
+    }).join(", ");
+  } else {
+    return optionValue;
+  }
+}
+function headerObjectFromString(optionKey, headerValue) {
+  if (!headerValue) {
+    return false;
+  }
+  if (optionKey === "contentSecurityPolicy") {
+    const directives = headerValue.split(";").map((directive) => directive.trim()).filter((directive) => directive);
+    const objectForm = {};
+    for (const directive of directives) {
+      const [type, ...sources] = directive.split(" ").map((token) => token.trim());
+      if (type === "upgrade-insecure-requests") {
+        objectForm[type] = true;
+      } else {
+        objectForm[type] = sources.join(" ");
+      }
+    }
+    return objectForm;
+  } else if (optionKey === "strictTransportSecurity") {
+    const directives = headerValue.split(";").map((directive) => directive.trim()).filter((directive) => directive);
+    const objectForm = {};
+    for (const directive of directives) {
+      const [type, value] = directive.split("=").map((token) => token.trim());
+      if (type === "max-age") {
+        objectForm.maxAge = Number(value);
+      } else if (type === "includeSubdomains" || type === "preload") {
+        objectForm[type] = true;
+      }
+    }
+    return objectForm;
+  } else if (optionKey === "permissionsPolicy") {
+    const directives = headerValue.split(",").map((directive) => directive.trim()).filter((directive) => directive);
+    const objectForm = {};
+    for (const directive of directives) {
+      const [type, value] = directive.split("=").map((token) => token.trim());
+      objectForm[type] = value;
+    }
+    return objectForm;
+  } else {
+    return headerValue;
+  }
+}
+function standardToSecurity(standardHeaders) {
+  if (!standardHeaders) {
+    return void 0;
+  }
+  const standardHeadersAsObject = {};
+  Object.entries(standardHeaders).forEach(([headerName, headerValue]) => {
+    const optionKey = getKeyFromName(headerName);
+    if (optionKey) {
+      if (typeof headerValue === "string") {
+        const objectValue = headerObjectFromString(optionKey, headerValue);
+        standardHeadersAsObject[optionKey] = objectValue;
+      } else {
+        standardHeadersAsObject[optionKey] = headerValue;
+      }
+    }
+  });
+  if (Object.keys(standardHeadersAsObject).length === 0) {
+    return void 0;
+  }
+  return standardHeadersAsObject;
+}
+function backwardsCompatibleSecurity(securityHeaders) {
+  if (!securityHeaders) {
+    return void 0;
+  }
+  const securityHeadersAsObject = {};
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    const optionKey = key;
+    if ((optionKey === "contentSecurityPolicy" || optionKey === "permissionsPolicy" || optionKey === "strictTransportSecurity") && typeof value === "string") {
+      const objectValue = headerObjectFromString(optionKey, value);
+      securityHeadersAsObject[optionKey] = objectValue;
+    } else if (value === "") {
+      securityHeadersAsObject[optionKey] = false;
+    } else {
+      securityHeadersAsObject[optionKey] = value;
+    }
+  });
+  return securityHeadersAsObject;
+}
+
+const _gKP7933MVt = defineNitroPlugin(async (nitroApp) => {
+  const appSecurityOptions = getAppSecurityOptions();
+  const runtimeConfig = useRuntimeConfig();
+  for (const route in runtimeConfig.nitro.routeRules) {
+    const rule = runtimeConfig.nitro.routeRules[route];
+    const { headers: headers2 } = rule;
+    const securityHeaders2 = standardToSecurity(headers2);
+    if (securityHeaders2) {
+      appSecurityOptions[route] = { headers: securityHeaders2 };
+    }
+  }
+  const securityOptions = runtimeConfig.security;
+  const { headers } = securityOptions;
+  const securityHeaders = backwardsCompatibleSecurity(headers);
+  appSecurityOptions["/**"] = defuReplaceArray(
+    { headers: securityHeaders },
+    securityOptions,
+    appSecurityOptions["/**"]
+  );
+  for (const route in runtimeConfig.nitro.routeRules) {
+    const rule = runtimeConfig.nitro.routeRules[route];
+    const { security } = rule;
+    if (security) {
+      const { headers: headers2 } = security;
+      const securityHeaders2 = backwardsCompatibleSecurity(headers2);
+      appSecurityOptions[route] = defuReplaceArray(
+        { headers: securityHeaders2 },
+        security,
+        appSecurityOptions[route]
+      );
+    }
+  }
+  nitroApp.hooks.hook("nuxt-security:headers", ({ route, headers: headers2 }) => {
+    appSecurityOptions[route] = defuReplaceArray(
+      { headers: headers2 },
+      appSecurityOptions[route]
+    );
+  });
+  nitroApp.hooks.hook("nuxt-security:ready", async () => {
+    await nitroApp.hooks.callHook("nuxt-security:routeRules", appSecurityOptions);
+  });
+  await nitroApp.hooks.callHook("nuxt-security:ready");
+});
+
+const sriHashes = {"/_nuxt/B0f4MSqa.js":"sha384-EFVZd5PkGAtG0HX0dvtLBZyFHdFUfbDCxFnCFFGA+ovUmINDrHzquEYSkMQ7pW1V","/_nuxt/B9RMtijX.js":"sha384-QlFr214/rhAM1DwnL1HFn0ljS/wNr+isHlJ1Ml7zB/2D6FNkt0f2my0k1+KYCH0o","/_nuxt/BqvGnjjr.js":"sha384-rOw3tURY6s90ZlUWPuZ4daNUtcOoW2NFFtSuAMwLwdz4A0zywQh5Ek8/oHe62sUF","/_nuxt/C6TC2xPE.js":"sha384-efzbvh9m3/Voot16KeLiBXs/A1nnh4o49ydBO0ELJD92VM1nqWyHaewI46S1SUpN","/_nuxt/C91Ko6A0.js":"sha384-VxSgVtiFAJg34ncU0gMUVQdyPWlacnI6SbgNrhfjISjvfF5BmYBTfGkODPEHbzEK","/_nuxt/Cs3vNMY6.js":"sha384-p6E1ve2LdYD4N6ezXb1ULSj7ah9aRbfPaRTiWWQX8VTYOEJ9r6mwCalnY0NzwiH0","/_nuxt/entry.BRWiKlTd.css":"sha384-XgVs58KBh99NzPygRsQjyzWWg+hTm/m+abeHi7fi2bActJL+h0uZzlAefVu+xf9h","/_nuxt/error-404.DXySnQZL.css":"sha384-DRLilb6heLXdpfpqYmJdT89qHVDjQPUVXTh2XRAagie93dcOSTZl9fkgbOpp6O/l","/_nuxt/error-500.CIkJDsQj.css":"sha384-+iSbD3irYfX5l0afKTAFHGL6S8L8WsZEpU4r2JW28Jt8Hvf1I3OnCPPzKGiIxc/c","/favicon.ico":"sha384-udbcbVSoJ0jynxYo+FKdhmcYDst1ze6s6rkgFExSYfpX6tAuGn5whsHNjmcRr4eU","/robots.txt":"sha384-7GZOiJ7WwbJ2PKz3iZ2Vt/NHNz65guUjQZ/uo6o2LYkbO/Al8pImelhUBJCReJw+"};
+
+const SCRIPT_RE$1 = /<script((?=[^>]+\bsrc="([^"]+)")(?![^>]+\bintegrity="[^"]+")[^>]+)(?:\/>|><\/script>)/g;
+const LINK_RE$1 = /<link((?=[^>]+\brel="(?:stylesheet|preload|modulepreload)")(?=[^>]+\bhref="([^"]+)")(?![^>]+\bintegrity="[\w\-+/=]+")[^>]+)>/g;
+const _zHY8c3HXtr = defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("render:html", (html, { event }) => {
+    const rules = resolveSecurityRules(event);
+    if (!rules.enabled || !rules.sri) {
+      return;
+    }
+    const sections = ["body", "bodyAppend", "bodyPrepend", "head"];
+    for (const section of sections) {
+      html[section] = html[section].map((element) => {
+        element = element.replace(SCRIPT_RE$1, (match, rest, src) => {
+          const hash = sriHashes[src];
+          if (hash) {
+            const integrityScript = `<script integrity="${hash}"${rest}><\/script>`;
+            return integrityScript;
+          } else {
+            return match;
+          }
+        });
+        element = element.replace(LINK_RE$1, (match, rest, href) => {
+          const hash = sriHashes[href];
+          if (hash) {
+            const integrityLink = `<link integrity="${hash}"${rest}>`;
+            return integrityLink;
+          } else {
+            return match;
+          }
+        });
+        return element;
+      });
+    }
+  });
+});
+
+const _jTopbk6pOI = defineNitroPlugin((nitroApp) => {
+  {
+    return;
+  }
+});
+
+const LINK_RE = /<link([^>]*?>)/gi;
+const SCRIPT_RE = /<script([^>]*?>)/gi;
+const STYLE_RE = /<style([^>]*?>)/gi;
+const _wK4rqLLoXQ = defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("request", (event) => {
+    const rules = resolveSecurityRules(event);
+    if (rules.enabled && rules.nonce && !false) {
+      const nonce = nodeCrypto.randomBytes(16).toString("base64");
+      event.context.security.nonce = nonce;
+    }
+  });
+  nitroApp.hooks.hook("render:html", (html, { event }) => {
+    const rules = resolveSecurityRules(event);
+    if (!rules.enabled || !rules.headers || !rules.headers.contentSecurityPolicy || !rules.nonce) {
+      return;
+    }
+    const nonce = event.context.security.nonce;
+    const sections = ["body", "bodyAppend", "bodyPrepend", "head"];
+    for (const section of sections) {
+      html[section] = html[section].map((element) => {
+        element = element.replace(LINK_RE, (match, rest) => {
+          return `<link nonce="${nonce}"` + rest;
+        });
+        element = element.replace(SCRIPT_RE, (match, rest) => {
+          return `<script nonce="${nonce}"` + rest;
+        });
+        element = element.replace(STYLE_RE, (match, rest) => {
+          return `<style nonce="${nonce}"` + rest;
+        });
+        return element;
+      });
+    }
+  });
+});
+
+const _aWUrME7jgb = defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("render:html", (response, { event }) => {
+    const rules = resolveSecurityRules(event);
+    if (rules.enabled && rules.headers) {
+      const headers = rules.headers;
+      if (headers.contentSecurityPolicy) {
+        const csp = headers.contentSecurityPolicy;
+        const nonce = event.context.security?.nonce;
+        const scriptHashes = event.context.security?.hashes?.script;
+        const styleHashes = event.context.security?.hashes?.style;
+        headers.contentSecurityPolicy = updateCspVariables(csp, nonce, scriptHashes, styleHashes);
+      }
+    }
+  });
+});
+function updateCspVariables(csp, nonce, scriptHashes, styleHashes) {
+  const generatedCsp = Object.fromEntries(Object.entries(csp).map(([directive, value]) => {
+    if (typeof value === "boolean") {
+      return [directive, value];
+    }
+    const sources = typeof value === "string" ? value.split(" ").map((token) => token.trim()).filter((token) => token) : value;
+    const modifiedSources = sources.filter((source) => !source.startsWith("'nonce-") || source === "'nonce-{{nonce}}'").map((source) => {
+      if (source === "'nonce-{{nonce}}'") {
+        return nonce ? `'nonce-${nonce}'` : "";
+      } else {
+        return source;
+      }
+    }).filter((source) => source);
+    if (directive === "script-src" && scriptHashes) {
+      modifiedSources.push(...scriptHashes);
+    }
+    if (directive === "style-src" && styleHashes) {
+      modifiedSources.push(...styleHashes);
+    }
+    return [directive, modifiedSources];
+  }));
+  return generatedCsp;
+}
+
+const _CvhvHUyEDH = defineNitroPlugin((nitroApp) => {
+  {
+    return;
+  }
+});
+
+const _zUgIZOSjBL = defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("render:response", (response, { event }) => {
+    const rules = resolveSecurityRules(event);
+    if (rules.enabled && rules.headers) {
+      const headers = rules.headers;
+      Object.entries(headers).forEach(([header, value]) => {
+        const headerName = getNameFromKey(header);
+        if (value === false) {
+          const { headers: standardHeaders } = getRouteRules(event);
+          const standardHeaderValue = standardHeaders?.[headerName];
+          const currentHeaderValue = getResponseHeader(event, headerName);
+          if (standardHeaderValue === currentHeaderValue) {
+            removeResponseHeader(event, headerName);
+          }
+        } else {
+          const headerValue = headerStringFromObject(header, value);
+          setResponseHeader(event, headerName, headerValue);
+        }
+      });
+    }
+  });
+});
+
+const _fIHj6fi3r4 = defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("beforeResponse", (event) => {
+    const rules = resolveSecurityRules(event);
+    if (rules.enabled && rules.hidePoweredBy && !event.node.res.headersSent) {
+      removeResponseHeader(event, "x-powered-by");
+    }
+  });
+});
+
+const _vdUD17M2uv = defineNitroPlugin(async (nitroApp) => {
+  {
+    const prerenderedHeaders = await useStorage("assets:nuxt-security").getItem("headers.json") || {};
+    nitroApp.hooks.hook("beforeResponse", (event) => {
+      const rules = resolveSecurityRules(event);
+      if (rules.enabled && rules.ssg && rules.ssg.nitroHeaders) {
+        const path = event.path.split("?")[0];
+        if (prerenderedHeaders[path]) {
+          setResponseHeaders(event, prerenderedHeaders[path]);
+        }
+      }
+    });
+  }
+});
+
 const plugins = [
-  
+  _gKP7933MVt,
+_zHY8c3HXtr,
+_jTopbk6pOI,
+_wK4rqLLoXQ,
+_aWUrME7jgb,
+_CvhvHUyEDH,
+_zUgIZOSjBL,
+_fIHj6fi3r4,
+_vdUD17M2uv
 ];
 
 const errorHandler = (async function errorhandler(error, event) {
@@ -5441,93 +6336,93 @@ const assets = {
   "/favicon.ico": {
     "type": "image/vnd.microsoft.icon",
     "etag": "\"10be-n8egyE9tcb7sKGr/pYCaQ4uWqxI\"",
-    "mtime": "2024-09-14T19:16:42.390Z",
+    "mtime": "2024-09-14T22:10:30.379Z",
     "size": 4286,
     "path": "../public/favicon.ico"
   },
   "/robots.txt": {
     "type": "text/plain; charset=utf-8",
     "etag": "\"1-rcg7GeeTSRscbqD9i0bNnzLlkvw\"",
-    "mtime": "2024-09-14T19:16:42.390Z",
+    "mtime": "2024-09-14T22:10:30.380Z",
     "size": 1,
     "path": "../public/robots.txt"
-  },
-  "/_nuxt/7VVsSTDw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1e42-askCaQsClKjpg3Lt0//5DxDCfUc\"",
-    "mtime": "2024-09-14T19:16:42.384Z",
-    "size": 7746,
-    "path": "../public/_nuxt/7VVsSTDw.js"
   },
   "/_nuxt/B0f4MSqa.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"52-Ibb8ySYR5uuCB7nrNdH7ALKzN4I\"",
-    "mtime": "2024-09-14T19:16:42.384Z",
+    "mtime": "2024-09-14T22:10:30.374Z",
     "size": 82,
     "path": "../public/_nuxt/B0f4MSqa.js"
   },
-  "/_nuxt/BzsFpCih.js": {
+  "/_nuxt/B9RMtijX.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"585-4Kgo6iraJ4LCpNH7RYVFwmXE1qs\"",
-    "mtime": "2024-09-14T19:16:42.384Z",
+    "etag": "\"42f8c-SKDy7WZOp0jsjTYZeLad1Vu1OAI\"",
+    "mtime": "2024-09-14T22:10:30.375Z",
+    "size": 274316,
+    "path": "../public/_nuxt/B9RMtijX.js"
+  },
+  "/_nuxt/BqvGnjjr.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"585-UGMavzX6JHRkzN1otO9lFhCwBGA\"",
+    "mtime": "2024-09-14T22:10:30.375Z",
     "size": 1413,
-    "path": "../public/_nuxt/BzsFpCih.js"
+    "path": "../public/_nuxt/BqvGnjjr.js"
   },
-  "/_nuxt/CpgHLUfS.js": {
+  "/_nuxt/C6TC2xPE.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"a7f-avo3EqE4hNrSyL+wt8Bruw9HrG8\"",
-    "mtime": "2024-09-14T19:16:42.384Z",
-    "size": 2687,
-    "path": "../public/_nuxt/CpgHLUfS.js"
-  },
-  "/_nuxt/CzcOqCSj.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"42d04-gH8WbxuHKCFiuis5JWKer0ydW/E\"",
-    "mtime": "2024-09-14T19:16:42.385Z",
-    "size": 273668,
-    "path": "../public/_nuxt/CzcOqCSj.js"
-  },
-  "/_nuxt/DvAxWb-E.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2167-Pk0MpTaxvwNCDAvVM5FF/oToyzU\"",
-    "mtime": "2024-09-14T19:16:42.384Z",
+    "etag": "\"2167-zOw9X64hIq3KboW0RQbJzxmik0Q\"",
+    "mtime": "2024-09-14T22:10:30.375Z",
     "size": 8551,
-    "path": "../public/_nuxt/DvAxWb-E.js"
+    "path": "../public/_nuxt/C6TC2xPE.js"
+  },
+  "/_nuxt/C91Ko6A0.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"a7f-KJCWR74ytqv7qsav31y2vhfCuXM\"",
+    "mtime": "2024-09-14T22:10:30.375Z",
+    "size": 2687,
+    "path": "../public/_nuxt/C91Ko6A0.js"
+  },
+  "/_nuxt/Cs3vNMY6.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1e42-VGc0wjS/ZGdUD8GsCPM3HUHjnSg\"",
+    "mtime": "2024-09-14T22:10:30.375Z",
+    "size": 7746,
+    "path": "../public/_nuxt/Cs3vNMY6.js"
   },
   "/_nuxt/entry.BRWiKlTd.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"306b-/XTcBLk+vkRwYtoeaDerRTlLX1s\"",
-    "mtime": "2024-09-14T19:16:42.385Z",
+    "mtime": "2024-09-14T22:10:30.375Z",
     "size": 12395,
     "path": "../public/_nuxt/entry.BRWiKlTd.css"
   },
   "/_nuxt/error-404.DXySnQZL.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"de4-cv/yrt/1rcgdseZU74nJDkNz/D4\"",
-    "mtime": "2024-09-14T19:16:42.385Z",
+    "mtime": "2024-09-14T22:10:30.375Z",
     "size": 3556,
     "path": "../public/_nuxt/error-404.DXySnQZL.css"
   },
   "/_nuxt/error-500.CIkJDsQj.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"75c-r1mfGkUqSoC3T/DKOvGxQ300OGQ\"",
-    "mtime": "2024-09-14T19:16:42.384Z",
+    "mtime": "2024-09-14T22:10:30.376Z",
     "size": 1884,
     "path": "../public/_nuxt/error-500.CIkJDsQj.css"
   },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-a5QaFK25CR99aKPL8EBKyQEMw3A\"",
-    "mtime": "2024-09-14T19:16:42.379Z",
+    "etag": "\"47-tL7e8nk3413OtPB4hA3caYBsI4U\"",
+    "mtime": "2024-09-14T22:10:30.368Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
-  "/_nuxt/builds/meta/5490dbbb-de6b-45fb-9bf6-ba4cf7f01a2f.json": {
+  "/_nuxt/builds/meta/836d03ea-23de-48ce-af68-3f0507847f87.json": {
     "type": "application/json",
-    "etag": "\"8b-2j4/iGUShqbl8gJer3MvpZKAZNw\"",
-    "mtime": "2024-09-14T19:16:42.375Z",
+    "etag": "\"8b-4rBJQWSNneFee8zuExnEwGvwI4w\"",
+    "mtime": "2024-09-14T22:10:30.363Z",
     "size": 139,
-    "path": "../public/_nuxt/builds/meta/5490dbbb-de6b-45fb-9bf6-ba4cf7f01a2f.json"
+    "path": "../public/_nuxt/builds/meta/836d03ea-23de-48ce-af68-3f0507847f87.json"
   }
 };
 
@@ -5795,6 +6690,259 @@ const _OzhQ2z = defineCachedEventHandler(async (event) => {
   // 1 week
 });
 
+const defaultThrowErrorValue = { throwError: true };
+const defaultSecurityConfig = (serverlUrl, strict) => {
+  const defaultConfig = {
+    strict,
+    headers: {
+      crossOriginResourcePolicy: "same-origin",
+      crossOriginOpenerPolicy: "same-origin",
+      crossOriginEmbedderPolicy: "credentialless",
+      contentSecurityPolicy: {
+        "base-uri": ["'none'"],
+        "font-src": ["'self'", "https:", "data:"],
+        "form-action": ["'self'"],
+        "frame-ancestors": ["'self'"],
+        "img-src": ["'self'", "data:"],
+        "object-src": ["'none'"],
+        "script-src-attr": ["'none'"],
+        "style-src": ["'self'", "https:", "'unsafe-inline'"],
+        "script-src": ["'self'", "https:", "'unsafe-inline'", "'strict-dynamic'", "'nonce-{{nonce}}'"],
+        "upgrade-insecure-requests": true
+      },
+      originAgentCluster: "?1",
+      referrerPolicy: "no-referrer",
+      strictTransportSecurity: {
+        maxAge: 15552e3,
+        includeSubdomains: true
+      },
+      xContentTypeOptions: "nosniff",
+      xDNSPrefetchControl: "off",
+      xDownloadOptions: "noopen",
+      xFrameOptions: "SAMEORIGIN",
+      xPermittedCrossDomainPolicies: "none",
+      xXSSProtection: "0",
+      permissionsPolicy: {
+        camera: [],
+        "display-capture": [],
+        fullscreen: [],
+        geolocation: [],
+        microphone: []
+      }
+    },
+    requestSizeLimiter: {
+      maxRequestSizeInBytes: 2e6,
+      maxUploadFileRequestInBytes: 8e6,
+      ...defaultThrowErrorValue
+    },
+    rateLimiter: {
+      // Twitter search rate limiting
+      tokensPerInterval: 150,
+      interval: 3e5,
+      headers: false,
+      driver: {
+        name: "lruCache"
+      },
+      ...defaultThrowErrorValue
+    },
+    xssValidator: {
+      methods: ["GET", "POST"],
+      ...defaultThrowErrorValue
+    },
+    corsHandler: {
+      // Options by CORS middleware for Express https://github.com/expressjs/cors#configuration-options
+      origin: serverlUrl,
+      methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+      preflight: {
+        statusCode: 204
+      }
+    },
+    allowedMethodsRestricter: {
+      methods: "*",
+      ...defaultThrowErrorValue
+    },
+    hidePoweredBy: true,
+    basicAuth: false,
+    enabled: true,
+    csrf: false,
+    nonce: true,
+    // https://github.com/Talljack/unplugin-remove/blob/main/src/types.ts
+    removeLoggers: {
+      external: [],
+      consoleType: ["log", "debug"],
+      include: [/\.[jt]sx?$/, /\.vue\??/],
+      exclude: [/node_modules/, /\.git/]
+    },
+    ssg: {
+      meta: true,
+      hashScripts: true,
+      hashStyles: false,
+      nitroHeaders: true,
+      exportToPresets: true
+    },
+    sri: true
+  };
+  return defaultConfig;
+};
+
+const FILE_UPLOAD_HEADER = "multipart/form-data";
+const defaultSizeLimiter = defaultSecurityConfig("").requestSizeLimiter;
+const _1WAuSr = defineEventHandler((event) => {
+  const rules = resolveSecurityRules(event);
+  if (rules.enabled && rules.requestSizeLimiter) {
+    const requestSizeLimiter = defu(
+      rules.requestSizeLimiter,
+      defaultSizeLimiter
+    );
+    if (["POST", "PUT", "DELETE"].includes(event.node.req.method)) {
+      const contentLengthValue = getRequestHeader(event, "content-length");
+      const contentTypeValue = getRequestHeader(event, "content-type");
+      const isFileUpload = contentTypeValue?.includes(FILE_UPLOAD_HEADER);
+      const requestLimit = isFileUpload ? requestSizeLimiter.maxUploadFileRequestInBytes : requestSizeLimiter.maxRequestSizeInBytes;
+      if (parseInt(contentLengthValue) >= requestLimit) {
+        const payloadTooLargeError = {
+          statusCode: 413,
+          statusMessage: "Payload Too Large"
+        };
+        if (requestSizeLimiter.throwError === false) {
+          return payloadTooLargeError;
+        }
+        throw createError$1(payloadTooLargeError);
+      }
+    }
+  }
+});
+
+const _zQE8JS = defineEventHandler((event) => {
+  const rules = resolveSecurityRules(event);
+  if (rules.enabled && rules.corsHandler) {
+    const { corsHandler } = rules;
+    handleCors(event, corsHandler);
+  }
+});
+
+const _UcgbE5 = defineEventHandler((event) => {
+  const rules = resolveSecurityRules(event);
+  if (rules.enabled && rules.allowedMethodsRestricter) {
+    const { allowedMethodsRestricter } = rules;
+    const allowedMethods = allowedMethodsRestricter.methods;
+    if (allowedMethods !== "*" && !allowedMethods.includes(event.node.req.method)) {
+      const methodNotAllowedError = {
+        statusCode: 405,
+        statusMessage: "Method not allowed"
+      };
+      if (allowedMethodsRestricter.throwError === false) {
+        return methodNotAllowedError;
+      }
+      throw createError$1(methodNotAllowedError);
+    }
+  }
+});
+
+const storage = useStorage("#rate-limiter-storage");
+const defaultRateLimiter = defaultSecurityConfig("").rateLimiter;
+const _RGWJry = defineEventHandler(async (event) => {
+  const rules = resolveSecurityRules(event);
+  const route = resolveSecurityRoute(event);
+  if (rules.enabled && rules.rateLimiter) {
+    const rateLimiter = defu(
+      rules.rateLimiter,
+      defaultRateLimiter
+    );
+    const ip = getIP(event);
+    const url = ip + route;
+    let storageItem = await storage.getItem(url);
+    if (!storageItem) {
+      await setStorageItem(rateLimiter, url);
+    } else {
+      if (typeof storageItem !== "object") {
+        return;
+      }
+      const timeSinceFirstRateLimit = storageItem.date;
+      const timeForInterval = storageItem.date + Number(rateLimiter.interval);
+      if (Date.now() >= timeForInterval) {
+        await setStorageItem(rateLimiter, url);
+        storageItem = await storage.getItem(url);
+      }
+      const isLimited = timeSinceFirstRateLimit <= timeForInterval && storageItem.value === 0;
+      if (isLimited) {
+        const tooManyRequestsError = {
+          statusCode: 429,
+          statusMessage: "Too Many Requests"
+        };
+        if (rules.rateLimiter.headers) {
+          setResponseHeader(event, "x-ratelimit-remaining", 0);
+          setResponseHeader(event, "x-ratelimit-limit", rateLimiter.tokensPerInterval);
+          setResponseHeader(event, "x-ratelimit-reset", timeForInterval);
+        }
+        if (rateLimiter.throwError === false) {
+          return tooManyRequestsError;
+        }
+        throw createError$1(tooManyRequestsError);
+      }
+      const newItemDate = timeSinceFirstRateLimit > timeForInterval ? Date.now() : storageItem.date;
+      const newStorageItem = { value: storageItem.value - 1, date: newItemDate };
+      await storage.setItem(url, newStorageItem);
+      const currentItem = await storage.getItem(url);
+      if (currentItem && rateLimiter.headers) {
+        setResponseHeader(event, "x-ratelimit-remaining", currentItem.value);
+        setResponseHeader(event, "x-ratelimit-limit", rateLimiter.tokensPerInterval);
+        setResponseHeader(event, "x-ratelimit-reset", timeForInterval);
+      }
+    }
+  }
+});
+async function setStorageItem(rateLimiter, url) {
+  const rateLimitedObject = { value: rateLimiter.tokensPerInterval, date: Date.now() };
+  await storage.setItem(url, rateLimitedObject);
+}
+function getIP(event) {
+  const ip = getRequestIP(event, { xForwardedFor: true }) || "";
+  return ip;
+}
+
+const _dg6hx7 = defineEventHandler(async (event) => {
+  const rules = resolveSecurityRules(event);
+  if (rules.enabled && rules.xssValidator) {
+    const filterOpt = {
+      ...rules.xssValidator,
+      escapeHtml: void 0
+    };
+    if (rules.xssValidator.escapeHtml === false) {
+      filterOpt.escapeHtml = (value) => value;
+    }
+    const xssValidator = new FilterXSS(filterOpt);
+    if (event.node.req.socket.readyState !== "readOnly") {
+      if (rules.xssValidator.methods && rules.xssValidator.methods.includes(
+        event.node.req.method
+      )) {
+        const valueToFilter = event.node.req.method === "GET" ? getQuery(event) : event.node.req.headers["content-type"]?.includes(
+          "multipart/form-data"
+        ) ? await readMultipartFormData(event) : await readBody(event);
+        if (valueToFilter && Object.keys(valueToFilter).length) {
+          if (valueToFilter.statusMessage && valueToFilter.statusMessage !== "Bad Request") {
+            return;
+          }
+          const stringifiedValue = JSON.stringify(valueToFilter);
+          const processedValue = xssValidator.process(
+            JSON.stringify(valueToFilter)
+          );
+          if (processedValue !== stringifiedValue) {
+            const badRequestError = {
+              statusCode: 400,
+              statusMessage: "Bad Request"
+            };
+            if (rules.xssValidator.throwError === false) {
+              return badRequestError;
+            }
+            throw createError$1(badRequestError);
+          }
+        }
+      }
+    }
+  }
+});
+
 const _0PjE6R = lazyEventHandler(() => {
   const opts = useRuntimeConfig().ipx || {};
   const fsDir = opts?.fs?.dir ? (Array.isArray(opts.fs.dir) ? opts.fs.dir : [opts.fs.dir]).map((dir) => isAbsolute(dir) ? dir : fileURLToPath(new URL(dir, globalThis._importMeta_.url))) : void 0;
@@ -5819,6 +6967,11 @@ const handlers = [
   { route: '', handler: _f4b49z, lazy: false, middleware: true, method: undefined },
   { route: '/__nuxt_error', handler: _lazy_maJPtv, lazy: true, middleware: false, method: undefined },
   { route: '/api/_nuxt_icon/:collection', handler: _OzhQ2z, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _1WAuSr, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _zQE8JS, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _UcgbE5, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _RGWJry, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _dg6hx7, lazy: false, middleware: false, method: undefined },
   { route: '/_ipx/**', handler: _0PjE6R, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_maJPtv, lazy: true, middleware: false, method: undefined }
 ];

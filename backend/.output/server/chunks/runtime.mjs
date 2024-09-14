@@ -3,6 +3,7 @@ import https, { Server } from 'node:https';
 import { promises, existsSync } from 'node:fs';
 import { dirname as dirname$1, resolve as resolve$1, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import nodeCrypto from 'node:crypto';
 
 const suspectProtoRx$1 = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
 const suspectConstructorRx$1 = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
@@ -93,7 +94,7 @@ function encodeQueryValue(input) {
 function encodeQueryKey(text) {
   return encodeQueryValue(text).replace(EQUAL_RE, "%3D");
 }
-function decode(text = "") {
+function decode$1(text = "") {
   try {
     return decodeURIComponent("" + text);
   } catch {
@@ -101,13 +102,13 @@ function decode(text = "") {
   }
 }
 function decodePath(text) {
-  return decode(text.replace(ENC_SLASH_RE, "%252F"));
+  return decode$1(text.replace(ENC_SLASH_RE, "%252F"));
 }
 function decodeQueryKey(text) {
-  return decode(text.replace(PLUS_RE, " "));
+  return decode$1(text.replace(PLUS_RE, " "));
 }
 function decodeQueryValue(text) {
-  return decode(text.replace(PLUS_RE, " "));
+  return decode$1(text.replace(PLUS_RE, " "));
 }
 
 function parseQuery(parametersString = "") {
@@ -332,7 +333,7 @@ function stringifyParsedURL(parsed) {
   return proto + auth + host + pathname + search + hash;
 }
 
-const defaults = Object.freeze({
+const defaults$2 = Object.freeze({
   ignoreUnknown: false,
   respectType: false,
   respectFunctionNames: false,
@@ -344,22 +345,22 @@ const defaults = Object.freeze({
   excludeValues: void 0,
   replacer: void 0
 });
-function objectHash(object, options) {
+function objectHash$1(object, options) {
   if (options) {
-    options = { ...defaults, ...options };
+    options = { ...defaults$2, ...options };
   } else {
-    options = defaults;
+    options = defaults$2;
   }
-  const hasher = createHasher(options);
+  const hasher = createHasher$1(options);
   hasher.dispatch(object);
   return hasher.toString();
 }
-const defaultPrototypesKeys = Object.freeze([
+const defaultPrototypesKeys$1 = Object.freeze([
   "prototype",
   "__proto__",
   "constructor"
 ]);
-function createHasher(options) {
+function createHasher$1(options) {
   let buff = "";
   let context = /* @__PURE__ */ new Map();
   const write = (str) => {
@@ -414,8 +415,8 @@ function createHasher(options) {
           keys = keys.sort();
         }
         let extraKeys = [];
-        if (options.respectType !== false && !isNativeFunction(object)) {
-          extraKeys = defaultPrototypesKeys;
+        if (options.respectType !== false && !isNativeFunction$1(object)) {
+          extraKeys = defaultPrototypesKeys$1;
         }
         if (options.excludeKeys) {
           keys = keys.filter((key) => {
@@ -453,7 +454,7 @@ function createHasher(options) {
       }
       const contextAdditions = /* @__PURE__ */ new Map();
       const entries = arr.map((entry) => {
-        const hasher = createHasher(options);
+        const hasher = createHasher$1(options);
         hasher.dispatch(entry);
         for (const [key, value] of hasher.getContext()) {
           contextAdditions.set(key, value);
@@ -496,7 +497,7 @@ function createHasher(options) {
     },
     function(fn) {
       write("fn:");
-      if (isNativeFunction(fn)) {
+      if (isNativeFunction$1(fn)) {
         this.dispatch("[native]");
       } else {
         this.dispatch(fn.toString());
@@ -648,13 +649,13 @@ function createHasher(options) {
     }
   };
 }
-const nativeFunc = "[native code] }";
-const nativeFuncLength = nativeFunc.length;
-function isNativeFunction(f) {
+const nativeFunc$1 = "[native code] }";
+const nativeFuncLength$1 = nativeFunc$1.length;
+function isNativeFunction$1(f) {
   if (typeof f !== "function") {
     return false;
   }
-  return Function.prototype.toString.call(f).slice(-nativeFuncLength) === nativeFunc;
+  return Function.prototype.toString.call(f).slice(-nativeFuncLength$1) === nativeFunc$1;
 }
 
 class WordArray {
@@ -932,7 +933,7 @@ function sha256base64(message) {
 }
 
 function hash(object, options = {}) {
-  const hashed = typeof object === "string" ? object : objectHash(object, options);
+  const hashed = typeof object === "string" ? object : objectHash$1(object, options);
   return sha256base64(hashed).slice(0, 10);
 }
 
@@ -1857,7 +1858,7 @@ class ServerResponse extends Writable {
   }
 }
 
-function hasProp(obj, prop) {
+function hasProp$1(obj, prop) {
   try {
     return prop in obj;
   } catch {
@@ -1865,21 +1866,21 @@ function hasProp(obj, prop) {
   }
 }
 
-var __defProp$2 = Object.defineProperty;
-var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField$2 = (obj, key, value) => {
-  __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+var __defProp$2$1 = Object.defineProperty;
+var __defNormalProp$2$1 = (obj, key, value) => key in obj ? __defProp$2$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField$2$1 = (obj, key, value) => {
+  __defNormalProp$2$1(obj, typeof key !== "symbol" ? key + "" : key, value);
   return value;
 };
-class H3Error extends Error {
+let H3Error$1 = class H3Error extends Error {
   constructor(message, opts = {}) {
     super(message, opts);
-    __publicField$2(this, "statusCode", 500);
-    __publicField$2(this, "fatal", false);
-    __publicField$2(this, "unhandled", false);
-    __publicField$2(this, "statusMessage");
-    __publicField$2(this, "data");
-    __publicField$2(this, "cause");
+    __publicField$2$1(this, "statusCode", 500);
+    __publicField$2$1(this, "fatal", false);
+    __publicField$2$1(this, "unhandled", false);
+    __publicField$2$1(this, "statusMessage");
+    __publicField$2$1(this, "data");
+    __publicField$2$1(this, "cause");
     if (opts.cause && !this.cause) {
       this.cause = opts.cause;
     }
@@ -1887,29 +1888,29 @@ class H3Error extends Error {
   toJSON() {
     const obj = {
       message: this.message,
-      statusCode: sanitizeStatusCode(this.statusCode, 500)
+      statusCode: sanitizeStatusCode$1(this.statusCode, 500)
     };
     if (this.statusMessage) {
-      obj.statusMessage = sanitizeStatusMessage(this.statusMessage);
+      obj.statusMessage = sanitizeStatusMessage$1(this.statusMessage);
     }
     if (this.data !== void 0) {
       obj.data = this.data;
     }
     return obj;
   }
-}
-__publicField$2(H3Error, "__h3_error__", true);
-function createError$1(input) {
+};
+__publicField$2$1(H3Error$1, "__h3_error__", true);
+function createError$2(input) {
   if (typeof input === "string") {
-    return new H3Error(input);
+    return new H3Error$1(input);
   }
-  if (isError(input)) {
+  if (isError$1(input)) {
     return input;
   }
-  const err = new H3Error(input.message ?? input.statusMessage ?? "", {
+  const err = new H3Error$1(input.message ?? input.statusMessage ?? "", {
     cause: input.cause || input
   });
-  if (hasProp(input, "stack")) {
+  if (hasProp$1(input, "stack")) {
     try {
       Object.defineProperty(err, "stack", {
         get() {
@@ -1927,9 +1928,9 @@ function createError$1(input) {
     err.data = input.data;
   }
   if (input.statusCode) {
-    err.statusCode = sanitizeStatusCode(input.statusCode, err.statusCode);
+    err.statusCode = sanitizeStatusCode$1(input.statusCode, err.statusCode);
   } else if (input.status) {
-    err.statusCode = sanitizeStatusCode(input.status, err.statusCode);
+    err.statusCode = sanitizeStatusCode$1(input.status, err.statusCode);
   }
   if (input.statusMessage) {
     err.statusMessage = input.statusMessage;
@@ -1938,7 +1939,7 @@ function createError$1(input) {
   }
   if (err.statusMessage) {
     const originalMessage = err.statusMessage;
-    const sanitizedMessage = sanitizeStatusMessage(err.statusMessage);
+    const sanitizedMessage = sanitizeStatusMessage$1(err.statusMessage);
     if (sanitizedMessage !== originalMessage) {
       console.warn(
         "[h3] Please prefer using `message` for longer error messages instead of `statusMessage`. In the future, `statusMessage` will be sanitized by default."
@@ -1957,7 +1958,7 @@ function sendError(event, error, debug) {
   if (event.handled) {
     return;
   }
-  const h3Error = isError(error) ? error : createError$1(error);
+  const h3Error = isError$1(error) ? error : createError$2(error);
   const responseBody = {
     statusCode: h3Error.statusCode,
     statusMessage: h3Error.statusMessage,
@@ -1975,14 +1976,14 @@ function sendError(event, error, debug) {
   event.node.res.setHeader("content-type", MIMES.json);
   event.node.res.end(JSON.stringify(responseBody, void 0, 2));
 }
-function isError(input) {
+function isError$1(input) {
   return input?.constructor?.__h3_error__ === true;
 }
 
 function getQuery(event) {
   return getQuery$1(event.path || "");
 }
-function isMethod(event, expected, allowHead) {
+function isMethod$1(event, expected, allowHead) {
   if (typeof expected === "string") {
     if (event.method === expected) {
       return true;
@@ -1992,9 +1993,9 @@ function isMethod(event, expected, allowHead) {
   }
   return false;
 }
-function assertMethod(event, expected, allowHead) {
-  if (!isMethod(event, expected)) {
-    throw createError$1({
+function assertMethod$1(event, expected, allowHead) {
+  if (!isMethod$1(event, expected)) {
+    throw createError$2({
       statusCode: 405,
       statusMessage: "HTTP method is not allowed."
     });
@@ -2014,11 +2015,11 @@ function getRequestHeader(event, name) {
   return value;
 }
 
-const RawBodySymbol = Symbol.for("h3RawBody");
-const PayloadMethods$1 = ["PATCH", "POST", "PUT", "DELETE"];
-function readRawBody(event, encoding = "utf8") {
-  assertMethod(event, PayloadMethods$1);
-  const _rawBody = event._requestBody || event.web?.request?.body || event.node.req[RawBodySymbol] || event.node.req.rawBody || event.node.req.body;
+const RawBodySymbol$1 = Symbol.for("h3RawBody");
+const PayloadMethods$1$1 = ["PATCH", "POST", "PUT", "DELETE"];
+function readRawBody$1(event, encoding = "utf8") {
+  assertMethod$1(event, PayloadMethods$1$1);
+  const _rawBody = event._requestBody || event.web?.request?.body || event.node.req[RawBodySymbol$1] || event.node.req.rawBody || event.node.req.body;
   if (_rawBody) {
     const promise2 = Promise.resolve(_rawBody).then((_resolved) => {
       if (Buffer.isBuffer(_resolved)) {
@@ -2061,7 +2062,7 @@ function readRawBody(event, encoding = "utf8") {
   if (!Number.parseInt(event.node.req.headers["content-length"] || "") && !String(event.node.req.headers["transfer-encoding"] ?? "").split(",").map((e) => e.trim()).filter(Boolean).includes("chunked")) {
     return Promise.resolve(void 0);
   }
-  const promise = event.node.req[RawBodySymbol] = new Promise(
+  const promise = event.node.req[RawBodySymbol$1] = new Promise(
     (resolve, reject) => {
       const bodyData = [];
       event.node.req.on("error", (err) => {
@@ -2077,18 +2078,18 @@ function readRawBody(event, encoding = "utf8") {
   return result;
 }
 function getRequestWebStream(event) {
-  if (!PayloadMethods$1.includes(event.method)) {
+  if (!PayloadMethods$1$1.includes(event.method)) {
     return;
   }
   const bodyStream = event.web?.request?.body || event._requestBody;
   if (bodyStream) {
     return bodyStream;
   }
-  const _hasRawBody = RawBodySymbol in event.node.req || "rawBody" in event.node.req || "body" in event.node.req || "__unenv__" in event.node.req;
+  const _hasRawBody = RawBodySymbol$1 in event.node.req || "rawBody" in event.node.req || "body" in event.node.req || "__unenv__" in event.node.req;
   if (_hasRawBody) {
     return new ReadableStream({
       async start(controller) {
-        const _rawBody = await readRawBody(event, false);
+        const _rawBody = await readRawBody$1(event, false);
         if (_rawBody) {
           controller.enqueue(_rawBody);
         }
@@ -2148,11 +2149,11 @@ const MIMES = {
   json: "application/json"
 };
 
-const DISALLOWED_STATUS_CHARS = /[^\u0009\u0020-\u007E]/g;
-function sanitizeStatusMessage(statusMessage = "") {
-  return statusMessage.replace(DISALLOWED_STATUS_CHARS, "");
+const DISALLOWED_STATUS_CHARS$1 = /[^\u0009\u0020-\u007E]/g;
+function sanitizeStatusMessage$1(statusMessage = "") {
+  return statusMessage.replace(DISALLOWED_STATUS_CHARS$1, "");
 }
-function sanitizeStatusCode(statusCode, defaultStatusCode = 200) {
+function sanitizeStatusCode$1(statusCode, defaultStatusCode = 200) {
   if (!statusCode) {
     return defaultStatusCode;
   }
@@ -2241,7 +2242,7 @@ function sendNoContent(event, code) {
   if (!code && event.node.res.statusCode !== 200) {
     code = event.node.res.statusCode;
   }
-  const _code = sanitizeStatusCode(code, 204);
+  const _code = sanitizeStatusCode$1(code, 204);
   if (_code === 204) {
     event.node.res.removeHeader("content-length");
   }
@@ -2250,13 +2251,13 @@ function sendNoContent(event, code) {
 }
 function setResponseStatus(event, code, text) {
   if (code) {
-    event.node.res.statusCode = sanitizeStatusCode(
+    event.node.res.statusCode = sanitizeStatusCode$1(
       code,
       event.node.res.statusCode
     );
   }
   if (text) {
-    event.node.res.statusMessage = sanitizeStatusMessage(text);
+    event.node.res.statusMessage = sanitizeStatusMessage$1(text);
   }
 }
 function getResponseStatus(event) {
@@ -2271,7 +2272,7 @@ function defaultContentType(event, type) {
   }
 }
 function sendRedirect(event, location, code = 302) {
-  event.node.res.statusCode = sanitizeStatusCode(
+  event.node.res.statusCode = sanitizeStatusCode$1(
     code,
     event.node.res.statusCode
   );
@@ -2327,7 +2328,7 @@ function sendStream(event, stream) {
     event._handled = true;
     return Promise.resolve();
   }
-  if (hasProp(stream, "pipeTo") && typeof stream.pipeTo === "function") {
+  if (hasProp$1(stream, "pipeTo") && typeof stream.pipeTo === "function") {
     return stream.pipeTo(
       new WritableStream({
         write(chunk) {
@@ -2338,7 +2339,7 @@ function sendStream(event, stream) {
       event.node.res.end();
     });
   }
-  if (hasProp(stream, "pipe") && typeof stream.pipe === "function") {
+  if (hasProp$1(stream, "pipe") && typeof stream.pipe === "function") {
     return new Promise((resolve, reject) => {
       stream.pipe(event.node.res);
       if (stream.on) {
@@ -2368,13 +2369,13 @@ function sendWebResponse(event, response) {
     }
   }
   if (response.status) {
-    event.node.res.statusCode = sanitizeStatusCode(
+    event.node.res.statusCode = sanitizeStatusCode$1(
       response.status,
       event.node.res.statusCode
     );
   }
   if (response.statusText) {
-    event.node.res.statusMessage = sanitizeStatusMessage(response.statusText);
+    event.node.res.statusMessage = sanitizeStatusMessage$1(response.statusText);
   }
   if (response.redirected) {
     event.node.res.setHeader("location", response.url);
@@ -2404,7 +2405,7 @@ async function proxyRequest(event, target, opts = {}) {
       body = getRequestWebStream(event);
       duplex = "half";
     } else {
-      body = await readRawBody(event, false).catch(() => void 0);
+      body = await readRawBody$1(event, false).catch(() => void 0);
     }
   }
   const method = opts.fetchOptions?.method || event.method;
@@ -2434,17 +2435,17 @@ async function sendProxy(event, target, opts = {}) {
       ...opts.fetchOptions
     });
   } catch (error) {
-    throw createError$1({
+    throw createError$2({
       status: 502,
       statusMessage: "Bad Gateway",
       cause: error
     });
   }
-  event.node.res.statusCode = sanitizeStatusCode(
+  event.node.res.statusCode = sanitizeStatusCode$1(
     response.status,
     event.node.res.statusCode
   );
-  event.node.res.statusMessage = sanitizeStatusMessage(response.statusText);
+  event.node.res.statusMessage = sanitizeStatusMessage$1(response.statusText);
   const cookies = [];
   for (const [key, value] of response.headers.entries()) {
     if (key === "content-encoding") {
@@ -2636,7 +2637,7 @@ class H3Event {
   }
 }
 function isEvent(input) {
-  return hasProp(input, "__is_event__");
+  return hasProp$1(input, "__is_event__");
 }
 function createEvent(req, res) {
   return new H3Event(req, res);
@@ -2655,27 +2656,27 @@ function _normalizeNodeHeaders(nodeHeaders) {
   return headers;
 }
 
-function defineEventHandler(handler) {
+function defineEventHandler$1(handler) {
   if (typeof handler === "function") {
     handler.__is_handler__ = true;
     return handler;
   }
   const _hooks = {
-    onRequest: _normalizeArray(handler.onRequest),
-    onBeforeResponse: _normalizeArray(handler.onBeforeResponse)
+    onRequest: _normalizeArray$1(handler.onRequest),
+    onBeforeResponse: _normalizeArray$1(handler.onBeforeResponse)
   };
   const _handler = (event) => {
-    return _callHandler(event, handler.handler, _hooks);
+    return _callHandler$1(event, handler.handler, _hooks);
   };
   _handler.__is_handler__ = true;
   _handler.__resolve__ = handler.handler.__resolve__;
   _handler.__websocket__ = handler.websocket;
   return _handler;
 }
-function _normalizeArray(input) {
+function _normalizeArray$1(input) {
   return input ? Array.isArray(input) ? input : [input] : void 0;
 }
-async function _callHandler(event, handler, hooks) {
+async function _callHandler$1(event, handler, hooks) {
   if (hooks.onRequest) {
     for (const hook of hooks.onRequest) {
       await hook(event);
@@ -2693,9 +2694,9 @@ async function _callHandler(event, handler, hooks) {
   }
   return response.body;
 }
-const eventHandler = defineEventHandler;
+const eventHandler$1 = defineEventHandler$1;
 function isEventHandler(input) {
-  return hasProp(input, "__is_handler__");
+  return hasProp$1(input, "__is_handler__");
 }
 function toEventHandler(input, _, _route) {
   if (!isEventHandler(input)) {
@@ -2731,7 +2732,7 @@ function defineLazyEventHandler(factory) {
     }
     return _promise;
   };
-  const handler = eventHandler((event) => {
+  const handler = eventHandler$1((event) => {
     if (_resolved) {
       return _resolved.handler(event);
     }
@@ -2783,7 +2784,7 @@ function use(app, arg1, arg2, arg3) {
 }
 function createAppEventHandler(stack, options) {
   const spacing = options.debug ? 2 : void 0;
-  return eventHandler(async (event) => {
+  return eventHandler$1(async (event) => {
     event.node.req.originalUrl = event.node.req.originalUrl || event.node.req.url || "/";
     const _reqPath = event._path || event.node.req.url || "/";
     let _layerPath;
@@ -2828,7 +2829,7 @@ function createAppEventHandler(stack, options) {
       }
     }
     if (!event.handled) {
-      throw createError$1({
+      throw createError$2({
         statusCode: 404,
         statusMessage: `Cannot find any path matching ${event.path || "/"}.`
       });
@@ -2905,7 +2906,7 @@ function handleHandlerResponse(event, val, jsonSpace) {
       });
     }
     if (val instanceof Error) {
-      throw createError$1(val);
+      throw createError$2(val);
     }
     if (typeof val.end === "function") {
       return true;
@@ -2921,7 +2922,7 @@ function handleHandlerResponse(event, val, jsonSpace) {
   if (valType === "bigint") {
     return send(event, val.toString(), MIMES.json);
   }
-  throw createError$1({
+  throw createError$2({
     statusCode: 500,
     statusMessage: `[h3] Cannot send ${valType} as response.`
   });
@@ -2989,7 +2990,7 @@ function createRouter(opts = {}) {
     const matched = _router.lookup(path);
     if (!matched || !matched.handlers) {
       return {
-        error: createError$1({
+        error: createError$2({
           statusCode: 404,
           name: "Not Found",
           statusMessage: `Cannot find any route matching ${path || "/"}.`
@@ -3017,7 +3018,7 @@ function createRouter(opts = {}) {
     }
     if (!handler) {
       return {
-        error: createError$1({
+        error: createError$2({
           statusCode: 405,
           name: "Method Not Allowed",
           statusMessage: `Method ${method} is not allowed on this route.`
@@ -3027,7 +3028,7 @@ function createRouter(opts = {}) {
     return { matched, handler };
   };
   const isPreemptive = opts.preemptive || opts.preemtive;
-  router.handler = eventHandler((event) => {
+  router.handler = eventHandler$1((event) => {
     const match = matchHandler(
       event.path,
       event.method.toLowerCase()
@@ -3076,8 +3077,8 @@ function toNodeListener(app) {
     try {
       await app.handler(event);
     } catch (_error) {
-      const error = createError$1(_error);
-      if (!isError(_error)) {
+      const error = createError$2(_error);
+      if (!isError$1(_error)) {
         error.unhandled = true;
       }
       setResponseStatus(event, error.statusCode, error.statusMessage);
@@ -3926,7 +3927,7 @@ const appConfig = defuFn(inlineAppConfig);
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "438c0a19-ae6d-47c6-82e7-aac14ff35203",
+    "buildId": "a5ca890d-6f43-4381-8358-c3b88c35729f",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4649,18 +4650,18 @@ const assets$1 = {
 function defineDriver(factory) {
   return factory;
 }
-function createError(driver, message, opts) {
+function createError$1(driver, message, opts) {
   const err = new Error(`[unstorage] [${driver}] ${message}`, opts);
   return err;
 }
 function createRequiredError(driver, name) {
   if (Array.isArray(name)) {
-    return createError(
+    return createError$1(
       driver,
       `Missing some of the required options ${name.map((n) => "`" + n + "`").join(", ")}`
     );
   }
-  return createError(driver, `Missing required option \`${name}\`.`);
+  return createError$1(driver, `Missing required option \`${name}\`.`);
 }
 
 function ignoreNotfound(err) {
@@ -4733,7 +4734,7 @@ const unstorage_47drivers_47fs_45lite = defineDriver((opts = {}) => {
   opts.base = resolve$1(opts.base);
   const r = (key) => {
     if (PATH_TRAVERSE_RE.test(key)) {
-      throw createError(
+      throw createError$1(
         DRIVER_NAME,
         `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
       );
@@ -5047,7 +5048,7 @@ function defineCachedEventHandler(handler, opts = defaultCacheOptions) {
     },
     _opts
   );
-  return defineEventHandler(async (event) => {
+  return defineEventHandler$1(async (event) => {
     if (opts.headersOnly) {
       if (handleCacheHeaders(event, { maxAge: opts.maxAge })) {
         return;
@@ -5177,7 +5178,7 @@ const _routeRulesMatcher = toRouteMatcher(
   createRouter$1({ routes: config.nitro.routeRules })
 );
 function createRouteRulesHandler(ctx) {
-  return eventHandler((event) => {
+  return eventHandler$1((event) => {
     const routeRules = getRouteRules(event);
     if (routeRules.headers) {
       setHeaders(event, routeRules.headers);
@@ -5295,58 +5296,58 @@ const assets = {
   "/_nuxt/8OYFhHVK.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"a7f-4epIU4XRwJMSboM78EZYqs3HBgg\"",
-    "mtime": "2024-09-14T19:24:25.537Z",
+    "mtime": "2024-09-14T21:49:07.298Z",
     "size": 2687,
     "path": "../public/_nuxt/8OYFhHVK.js"
   },
   "/_nuxt/BDXLV4y2.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"36a64-szqNAxnCrIcGUQiQHnwJZ+udLdE\"",
-    "mtime": "2024-09-14T19:24:25.537Z",
+    "mtime": "2024-09-14T21:49:07.298Z",
     "size": 223844,
     "path": "../public/_nuxt/BDXLV4y2.js"
   },
   "/_nuxt/DOpUrtF9.js": {
     "type": "text/javascript; charset=utf-8",
     "etag": "\"2167-7iePdBfJJTWj3G/rxLoBtXe8ufc\"",
-    "mtime": "2024-09-14T19:24:25.537Z",
+    "mtime": "2024-09-14T21:49:07.298Z",
     "size": 8551,
     "path": "../public/_nuxt/DOpUrtF9.js"
   },
   "/_nuxt/entry.BCImm306.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"306b-dcASCR8NMn8pcAL+Bivtep/dgL0\"",
-    "mtime": "2024-09-14T19:24:25.537Z",
+    "mtime": "2024-09-14T21:49:07.299Z",
     "size": 12395,
     "path": "../public/_nuxt/entry.BCImm306.css"
   },
   "/_nuxt/error-404.D-AvUzLt.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"de4-2WWAaRSQ0MhWXaqGsZoon4xNXj0\"",
-    "mtime": "2024-09-14T19:24:25.538Z",
+    "mtime": "2024-09-14T21:49:07.302Z",
     "size": 3556,
     "path": "../public/_nuxt/error-404.D-AvUzLt.css"
   },
   "/_nuxt/error-500.21ZDxC33.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"75c-vRleuHFeJqFk8jqx3IkfiQTVBgg\"",
-    "mtime": "2024-09-14T19:24:25.538Z",
+    "mtime": "2024-09-14T21:49:07.302Z",
     "size": 1884,
     "path": "../public/_nuxt/error-500.21ZDxC33.css"
   },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-OqEYNGKvG2Dm6LRnjv2CFywI/rg\"",
-    "mtime": "2024-09-14T19:24:25.533Z",
+    "etag": "\"47-OOx+FBcVRmj1yS5Mie+SqJdebWo\"",
+    "mtime": "2024-09-14T21:49:07.292Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
-  "/_nuxt/builds/meta/438c0a19-ae6d-47c6-82e7-aac14ff35203.json": {
+  "/_nuxt/builds/meta/a5ca890d-6f43-4381-8358-c3b88c35729f.json": {
     "type": "application/json",
-    "etag": "\"8b-mgyp0ee+tuf4CK2QNGBHnT3S4vw\"",
-    "mtime": "2024-09-14T19:24:25.527Z",
+    "etag": "\"8b-+GT2BLzWhLvIH0iQzk4kOMUbfKE\"",
+    "mtime": "2024-09-14T21:49:07.288Z",
     "size": 139,
-    "path": "../public/_nuxt/builds/meta/438c0a19-ae6d-47c6-82e7-aac14ff35203.json"
+    "path": "../public/_nuxt/builds/meta/a5ca890d-6f43-4381-8358-c3b88c35729f.json"
   }
 };
 
@@ -5476,7 +5477,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _f4b49z = eventHandler((event) => {
+const _f4b49z = eventHandler$1((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -5507,7 +5508,7 @@ const _f4b49z = eventHandler((event) => {
   if (!asset) {
     if (isPublicAssetURL(id)) {
       removeResponseHeader(event, "Cache-Control");
-      throw createError$1({
+      throw createError$2({
         statusMessage: "Cannot find static asset " + id,
         statusCode: 404
       });
@@ -5543,10 +5544,1299 @@ const _f4b49z = eventHandler((event) => {
   return readAsset(id);
 });
 
+function authMiddleware(req, res, next) {
+  var _a;
+  const user = (_a = req.session) == null ? void 0 : _a.user;
+  if (user) {
+    next();
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+}
+
+function parse(str, options) {
+  if (typeof str !== "string") {
+    throw new TypeError("argument str must be a string");
+  }
+  const obj = {};
+  const opt = {};
+  const dec = opt.decode || decode;
+  let index = 0;
+  while (index < str.length) {
+    const eqIdx = str.indexOf("=", index);
+    if (eqIdx === -1) {
+      break;
+    }
+    let endIdx = str.indexOf(";", index);
+    if (endIdx === -1) {
+      endIdx = str.length;
+    } else if (endIdx < eqIdx) {
+      index = str.lastIndexOf(";", eqIdx - 1) + 1;
+      continue;
+    }
+    const key = str.slice(index, eqIdx).trim();
+    if (opt?.filter && !opt?.filter(key)) {
+      index = endIdx + 1;
+      continue;
+    }
+    if (void 0 === obj[key]) {
+      let val = str.slice(eqIdx + 1, endIdx).trim();
+      if (val.codePointAt(0) === 34) {
+        val = val.slice(1, -1);
+      }
+      obj[key] = tryDecode(val, dec);
+    }
+    index = endIdx + 1;
+  }
+  return obj;
+}
+function decode(str) {
+  return str.includes("%") ? decodeURIComponent(str) : str;
+}
+function tryDecode(str, decode2) {
+  try {
+    return decode2(str);
+  } catch {
+    return str;
+  }
+}
+
+const fieldContentRegExp = /^[\u0009\u0020-\u007E\u0080-\u00FF]+$/;
+function serialize(name, value, options) {
+  const opt = options || {};
+  const enc = opt.encode || encodeURIComponent;
+  if (typeof enc !== "function") {
+    throw new TypeError("option encode is invalid");
+  }
+  if (!fieldContentRegExp.test(name)) {
+    throw new TypeError("argument name is invalid");
+  }
+  const encodedValue = enc(value);
+  if (encodedValue && !fieldContentRegExp.test(encodedValue)) {
+    throw new TypeError("argument val is invalid");
+  }
+  let str = name + "=" + encodedValue;
+  if (void 0 !== opt.maxAge && opt.maxAge !== null) {
+    const maxAge = opt.maxAge - 0;
+    if (Number.isNaN(maxAge) || !Number.isFinite(maxAge)) {
+      throw new TypeError("option maxAge is invalid");
+    }
+    str += "; Max-Age=" + Math.floor(maxAge);
+  }
+  if (opt.domain) {
+    if (!fieldContentRegExp.test(opt.domain)) {
+      throw new TypeError("option domain is invalid");
+    }
+    str += "; Domain=" + opt.domain;
+  }
+  if (opt.path) {
+    if (!fieldContentRegExp.test(opt.path)) {
+      throw new TypeError("option path is invalid");
+    }
+    str += "; Path=" + opt.path;
+  }
+  if (opt.expires) {
+    if (!isDate(opt.expires) || Number.isNaN(opt.expires.valueOf())) {
+      throw new TypeError("option expires is invalid");
+    }
+    str += "; Expires=" + opt.expires.toUTCString();
+  }
+  if (opt.httpOnly) {
+    str += "; HttpOnly";
+  }
+  if (opt.secure) {
+    str += "; Secure";
+  }
+  if (opt.priority) {
+    const priority = typeof opt.priority === "string" ? opt.priority.toLowerCase() : opt.priority;
+    switch (priority) {
+      case "low": {
+        str += "; Priority=Low";
+        break;
+      }
+      case "medium": {
+        str += "; Priority=Medium";
+        break;
+      }
+      case "high": {
+        str += "; Priority=High";
+        break;
+      }
+      default: {
+        throw new TypeError("option priority is invalid");
+      }
+    }
+  }
+  if (opt.sameSite) {
+    const sameSite = typeof opt.sameSite === "string" ? opt.sameSite.toLowerCase() : opt.sameSite;
+    switch (sameSite) {
+      case true: {
+        str += "; SameSite=Strict";
+        break;
+      }
+      case "lax": {
+        str += "; SameSite=Lax";
+        break;
+      }
+      case "strict": {
+        str += "; SameSite=Strict";
+        break;
+      }
+      case "none": {
+        str += "; SameSite=None";
+        break;
+      }
+      default: {
+        throw new TypeError("option sameSite is invalid");
+      }
+    }
+  }
+  if (opt.partitioned) {
+    str += "; Partitioned";
+  }
+  return str;
+}
+function isDate(val) {
+  return Object.prototype.toString.call(val) === "[object Date]" || val instanceof Date;
+}
+
+const defaults$1 = Object.freeze({
+  ignoreUnknown: false,
+  respectType: false,
+  respectFunctionNames: false,
+  respectFunctionProperties: false,
+  unorderedObjects: true,
+  unorderedArrays: false,
+  unorderedSets: false,
+  excludeKeys: void 0,
+  excludeValues: void 0,
+  replacer: void 0
+});
+function objectHash(object, options) {
+  if (options) {
+    options = { ...defaults$1, ...options };
+  } else {
+    options = defaults$1;
+  }
+  const hasher = createHasher(options);
+  hasher.dispatch(object);
+  return hasher.toString();
+}
+const defaultPrototypesKeys = Object.freeze([
+  "prototype",
+  "__proto__",
+  "constructor"
+]);
+function createHasher(options) {
+  let buff = "";
+  let context = /* @__PURE__ */ new Map();
+  const write = (str) => {
+    buff += str;
+  };
+  return {
+    toString() {
+      return buff;
+    },
+    getContext() {
+      return context;
+    },
+    dispatch(value) {
+      if (options.replacer) {
+        value = options.replacer(value);
+      }
+      const type = value === null ? "null" : typeof value;
+      return this[type](value);
+    },
+    object(object) {
+      if (object && typeof object.toJSON === "function") {
+        return this.object(object.toJSON());
+      }
+      const objString = Object.prototype.toString.call(object);
+      let objType = "";
+      const objectLength = objString.length;
+      if (objectLength < 10) {
+        objType = "unknown:[" + objString + "]";
+      } else {
+        objType = objString.slice(8, objectLength - 1);
+      }
+      objType = objType.toLowerCase();
+      let objectNumber = null;
+      if ((objectNumber = context.get(object)) === void 0) {
+        context.set(object, context.size);
+      } else {
+        return this.dispatch("[CIRCULAR:" + objectNumber + "]");
+      }
+      if (typeof Buffer !== "undefined" && Buffer.isBuffer && Buffer.isBuffer(object)) {
+        write("buffer:");
+        return write(object.toString("utf8"));
+      }
+      if (objType !== "object" && objType !== "function" && objType !== "asyncfunction") {
+        if (this[objType]) {
+          this[objType](object);
+        } else if (!options.ignoreUnknown) {
+          this.unkown(object, objType);
+        }
+      } else {
+        let keys = Object.keys(object);
+        if (options.unorderedObjects) {
+          keys = keys.sort();
+        }
+        let extraKeys = [];
+        if (options.respectType !== false && !isNativeFunction(object)) {
+          extraKeys = defaultPrototypesKeys;
+        }
+        if (options.excludeKeys) {
+          keys = keys.filter((key) => {
+            return !options.excludeKeys(key);
+          });
+          extraKeys = extraKeys.filter((key) => {
+            return !options.excludeKeys(key);
+          });
+        }
+        write("object:" + (keys.length + extraKeys.length) + ":");
+        const dispatchForKey = (key) => {
+          this.dispatch(key);
+          write(":");
+          if (!options.excludeValues) {
+            this.dispatch(object[key]);
+          }
+          write(",");
+        };
+        for (const key of keys) {
+          dispatchForKey(key);
+        }
+        for (const key of extraKeys) {
+          dispatchForKey(key);
+        }
+      }
+    },
+    array(arr, unordered) {
+      unordered = unordered === void 0 ? options.unorderedArrays !== false : unordered;
+      write("array:" + arr.length + ":");
+      if (!unordered || arr.length <= 1) {
+        for (const entry of arr) {
+          this.dispatch(entry);
+        }
+        return;
+      }
+      const contextAdditions = /* @__PURE__ */ new Map();
+      const entries = arr.map((entry) => {
+        const hasher = createHasher(options);
+        hasher.dispatch(entry);
+        for (const [key, value] of hasher.getContext()) {
+          contextAdditions.set(key, value);
+        }
+        return hasher.toString();
+      });
+      context = contextAdditions;
+      entries.sort();
+      return this.array(entries, false);
+    },
+    date(date) {
+      return write("date:" + date.toJSON());
+    },
+    symbol(sym) {
+      return write("symbol:" + sym.toString());
+    },
+    unkown(value, type) {
+      write(type);
+      if (!value) {
+        return;
+      }
+      write(":");
+      if (value && typeof value.entries === "function") {
+        return this.array(
+          Array.from(value.entries()),
+          true
+          /* ordered */
+        );
+      }
+    },
+    error(err) {
+      return write("error:" + err.toString());
+    },
+    boolean(bool) {
+      return write("bool:" + bool);
+    },
+    string(string) {
+      write("string:" + string.length + ":");
+      write(string);
+    },
+    function(fn) {
+      write("fn:");
+      if (isNativeFunction(fn)) {
+        this.dispatch("[native]");
+      } else {
+        this.dispatch(fn.toString());
+      }
+      if (options.respectFunctionNames !== false) {
+        this.dispatch("function-name:" + String(fn.name));
+      }
+      if (options.respectFunctionProperties) {
+        this.object(fn);
+      }
+    },
+    number(number) {
+      return write("number:" + number);
+    },
+    xml(xml) {
+      return write("xml:" + xml.toString());
+    },
+    null() {
+      return write("Null");
+    },
+    undefined() {
+      return write("Undefined");
+    },
+    regexp(regex) {
+      return write("regex:" + regex.toString());
+    },
+    uint8array(arr) {
+      write("uint8array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    uint8clampedarray(arr) {
+      write("uint8clampedarray:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    int8array(arr) {
+      write("int8array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    uint16array(arr) {
+      write("uint16array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    int16array(arr) {
+      write("int16array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    uint32array(arr) {
+      write("uint32array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    int32array(arr) {
+      write("int32array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    float32array(arr) {
+      write("float32array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    float64array(arr) {
+      write("float64array:");
+      return this.dispatch(Array.prototype.slice.call(arr));
+    },
+    arraybuffer(arr) {
+      write("arraybuffer:");
+      return this.dispatch(new Uint8Array(arr));
+    },
+    url(url) {
+      return write("url:" + url.toString());
+    },
+    map(map) {
+      write("map:");
+      const arr = [...map];
+      return this.array(arr, options.unorderedSets !== false);
+    },
+    set(set) {
+      write("set:");
+      const arr = [...set];
+      return this.array(arr, options.unorderedSets !== false);
+    },
+    file(file) {
+      write("file:");
+      return this.dispatch([file.name, file.size, file.type, file.lastModfied]);
+    },
+    blob() {
+      if (options.ignoreUnknown) {
+        return write("[blob]");
+      }
+      throw new Error(
+        'Hashing Blob objects is currently not supported\nUse "options.replacer" or "options.ignoreUnknown"\n'
+      );
+    },
+    domwindow() {
+      return write("domwindow");
+    },
+    bigint(number) {
+      return write("bigint:" + number.toString());
+    },
+    /* Node.js standard native objects */
+    process() {
+      return write("process");
+    },
+    timer() {
+      return write("timer");
+    },
+    pipe() {
+      return write("pipe");
+    },
+    tcp() {
+      return write("tcp");
+    },
+    udp() {
+      return write("udp");
+    },
+    tty() {
+      return write("tty");
+    },
+    statwatcher() {
+      return write("statwatcher");
+    },
+    securecontext() {
+      return write("securecontext");
+    },
+    connection() {
+      return write("connection");
+    },
+    zlib() {
+      return write("zlib");
+    },
+    context() {
+      return write("context");
+    },
+    nodescript() {
+      return write("nodescript");
+    },
+    httpparser() {
+      return write("httpparser");
+    },
+    dataview() {
+      return write("dataview");
+    },
+    signal() {
+      return write("signal");
+    },
+    fsevent() {
+      return write("fsevent");
+    },
+    tlswrap() {
+      return write("tlswrap");
+    }
+  };
+}
+const nativeFunc = "[native code] }";
+const nativeFuncLength = nativeFunc.length;
+function isNativeFunction(f) {
+  if (typeof f !== "function") {
+    return false;
+  }
+  return Function.prototype.toString.call(f).slice(-nativeFuncLength) === nativeFunc;
+}
+
+const subtle = nodeCrypto.webcrypto?.subtle || {};
+const randomUUID = () => {
+  return nodeCrypto.randomUUID();
+};
+const getRandomValues = (array) => {
+  return nodeCrypto.webcrypto.getRandomValues(array);
+};
+const _crypto = {
+  randomUUID,
+  getRandomValues,
+  subtle
+};
+
+// src/utils.ts
+var alphabetByEncoding = {};
+var alphabetByValue = Array.from({ length: 64 });
+for (let i = 0, start = "A".charCodeAt(0), limit = "Z".charCodeAt(0); i + start <= limit; i++) {
+  const char = String.fromCharCode(i + start);
+  alphabetByEncoding[char] = i;
+  alphabetByValue[i] = char;
+}
+for (let i = 0, start = "a".charCodeAt(0), limit = "z".charCodeAt(0); i + start <= limit; i++) {
+  const char = String.fromCharCode(i + start);
+  const index = i + 26;
+  alphabetByEncoding[char] = index;
+  alphabetByValue[index] = char;
+}
+for (let i = 0; i < 10; i++) {
+  alphabetByEncoding[i.toString(10)] = i + 52;
+  const char = i.toString(10);
+  const index = i + 52;
+  alphabetByEncoding[char] = index;
+  alphabetByValue[index] = char;
+}
+alphabetByEncoding["-"] = 62;
+alphabetByValue[62] = "-";
+alphabetByEncoding["_"] = 63;
+alphabetByValue[63] = "_";
+var bitsPerLetter = 6;
+var bitsPerByte = 8;
+var maxLetterValue = 63;
+var stringToBuffer = (value) => {
+  return new TextEncoder().encode(value);
+};
+var bufferToString = (value) => {
+  return new TextDecoder().decode(value);
+};
+var base64urlDecode = (_input) => {
+  const input = _input + "=".repeat((4 - _input.length % 4) % 4);
+  let totalByteLength = input.length / 4 * 3;
+  if (input.endsWith("==")) {
+    totalByteLength -= 2;
+  } else if (input.endsWith("=")) {
+    totalByteLength--;
+  }
+  const out = new ArrayBuffer(totalByteLength);
+  const dataView = new DataView(out);
+  for (let i = 0; i < input.length; i += 4) {
+    let bits = 0;
+    let bitLength = 0;
+    for (let j = i, limit = i + 3; j <= limit; j++) {
+      if (input[j] === "=") {
+        bits >>= bitsPerLetter;
+      } else {
+        if (!(input[j] in alphabetByEncoding)) {
+          throw new TypeError(`Invalid character ${input[j]} in base64 string.`);
+        }
+        bits |= alphabetByEncoding[input[j]] << (limit - j) * bitsPerLetter;
+        bitLength += bitsPerLetter;
+      }
+    }
+    const chunkOffset = i / 4 * 3;
+    bits >>= bitLength % bitsPerByte;
+    const byteLength = Math.floor(bitLength / bitsPerByte);
+    for (let k = 0; k < byteLength; k++) {
+      const offset = (byteLength - k - 1) * bitsPerByte;
+      dataView.setUint8(chunkOffset + k, (bits & 255 << offset) >> offset);
+    }
+  }
+  return new Uint8Array(out);
+};
+var base64urlEncode = (_input) => {
+  const input = typeof _input === "string" ? stringToBuffer(_input) : _input;
+  let str = "";
+  for (let i = 0; i < input.length; i += 3) {
+    let bits = 0;
+    let bitLength = 0;
+    for (let j = i, limit = Math.min(i + 3, input.length); j < limit; j++) {
+      bits |= input[j] << (limit - j - 1) * bitsPerByte;
+      bitLength += bitsPerByte;
+    }
+    const bitClusterCount = Math.ceil(bitLength / bitsPerLetter);
+    bits <<= bitClusterCount * bitsPerLetter - bitLength;
+    for (let k = 1; k <= bitClusterCount; k++) {
+      const offset = (bitClusterCount - k) * bitsPerLetter;
+      str += alphabetByValue[(bits & maxLetterValue << offset) >> offset];
+    }
+  }
+  return str;
+};
+
+// src/index.ts
+var defaults = {
+  encryption: { saltBits: 256, algorithm: "aes-256-cbc", iterations: 1, minPasswordlength: 32 },
+  integrity: { saltBits: 256, algorithm: "sha256", iterations: 1, minPasswordlength: 32 },
+  ttl: 0,
+  timestampSkewSec: 60,
+  localtimeOffsetMsec: 0
+};
+var clone = (options) => ({
+  ...options,
+  encryption: { ...options.encryption },
+  integrity: { ...options.integrity }
+});
+var algorithms = {
+  "aes-128-ctr": { keyBits: 128, ivBits: 128, name: "AES-CTR" },
+  "aes-256-cbc": { keyBits: 256, ivBits: 128, name: "AES-CBC" },
+  sha256: { keyBits: 256, name: "SHA-256" }
+};
+var macPrefix = "Fe26.2";
+var randomBytes = (_crypto, size) => {
+  const bytes = new Uint8Array(size);
+  _crypto.getRandomValues(bytes);
+  return bytes;
+};
+var randomBits = (_crypto, bits) => {
+  if (bits < 1)
+    throw new Error("Invalid random bits count");
+  const bytes = Math.ceil(bits / 8);
+  return randomBytes(_crypto, bytes);
+};
+var pbkdf2 = async (_crypto, password, salt, iterations, keyLength, hash) => {
+  const passwordBuffer = stringToBuffer(password);
+  const importedKey = await _crypto.subtle.importKey(
+    "raw",
+    passwordBuffer,
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"]
+  );
+  const saltBuffer = stringToBuffer(salt);
+  const params = { name: "PBKDF2", hash, salt: saltBuffer, iterations };
+  const derivation = await _crypto.subtle.deriveBits(params, importedKey, keyLength * 8);
+  return derivation;
+};
+var generateKey = async (_crypto, password, options) => {
+  var _a;
+  if (!(password == null ? void 0 : password.length))
+    throw new Error("Empty password");
+  if (options == null || typeof options !== "object")
+    throw new Error("Bad options");
+  if (!(options.algorithm in algorithms))
+    throw new Error(`Unknown algorithm: ${options.algorithm}`);
+  const algorithm = algorithms[options.algorithm];
+  const result = {};
+  const hmac = (_a = options.hmac) != null ? _a : false;
+  const id = hmac ? { name: "HMAC", hash: algorithm.name } : { name: algorithm.name };
+  const usage = hmac ? ["sign", "verify"] : ["encrypt", "decrypt"];
+  if (typeof password === "string") {
+    if (password.length < options.minPasswordlength)
+      throw new Error(
+        `Password string too short (min ${options.minPasswordlength} characters required)`
+      );
+    let { salt = "" } = options;
+    if (!salt) {
+      const { saltBits = 0 } = options;
+      if (!saltBits)
+        throw new Error("Missing salt and saltBits options");
+      const randomSalt = randomBits(_crypto, saltBits);
+      salt = [...new Uint8Array(randomSalt)].map((x) => x.toString(16).padStart(2, "0")).join("");
+    }
+    const derivedKey = await pbkdf2(
+      _crypto,
+      password,
+      salt,
+      options.iterations,
+      algorithm.keyBits / 8,
+      "SHA-1"
+    );
+    const importedEncryptionKey = await _crypto.subtle.importKey(
+      "raw",
+      derivedKey,
+      id,
+      false,
+      usage
+    );
+    result.key = importedEncryptionKey;
+    result.salt = salt;
+  } else {
+    if (password.length < algorithm.keyBits / 8)
+      throw new Error("Key buffer (password) too small");
+    result.key = await _crypto.subtle.importKey("raw", password, id, false, usage);
+    result.salt = "";
+  }
+  if (options.iv)
+    result.iv = options.iv;
+  else if ("ivBits" in algorithm)
+    result.iv = randomBits(_crypto, algorithm.ivBits);
+  return result;
+};
+var getEncryptParams = (algorithm, key, data) => {
+  return [
+    algorithm === "aes-128-ctr" ? { name: "AES-CTR", counter: key.iv, length: 128 } : { name: "AES-CBC", iv: key.iv },
+    key.key,
+    typeof data === "string" ? stringToBuffer(data) : data
+  ];
+};
+var encrypt = async (_crypto, password, options, data) => {
+  const key = await generateKey(_crypto, password, options);
+  const encrypted = await _crypto.subtle.encrypt(...getEncryptParams(options.algorithm, key, data));
+  return { encrypted: new Uint8Array(encrypted), key };
+};
+var decrypt = async (_crypto, password, options, data) => {
+  const key = await generateKey(_crypto, password, options);
+  const decrypted = await _crypto.subtle.decrypt(...getEncryptParams(options.algorithm, key, data));
+  return bufferToString(new Uint8Array(decrypted));
+};
+var hmacWithPassword = async (_crypto, password, options, data) => {
+  const key = await generateKey(_crypto, password, { ...options, hmac: true });
+  const textBuffer = stringToBuffer(data);
+  const signed = await _crypto.subtle.sign({ name: "HMAC" }, key.key, textBuffer);
+  const digest = base64urlEncode(new Uint8Array(signed));
+  return { digest, salt: key.salt };
+};
+var normalizePassword = (password) => {
+  if (typeof password === "string" || password instanceof Uint8Array)
+    return { encryption: password, integrity: password };
+  if ("secret" in password)
+    return { id: password.id, encryption: password.secret, integrity: password.secret };
+  return { id: password.id, encryption: password.encryption, integrity: password.integrity };
+};
+var seal = async (_crypto, object, password, options) => {
+  if (!password)
+    throw new Error("Empty password");
+  const opts = clone(options);
+  const now = Date.now() + (opts.localtimeOffsetMsec || 0);
+  const objectString = JSON.stringify(object);
+  const pass = normalizePassword(password);
+  const { id = "", encryption, integrity } = pass;
+  if (id && !/^\w+$/.test(id))
+    throw new Error("Invalid password id");
+  const { encrypted, key } = await encrypt(_crypto, encryption, opts.encryption, objectString);
+  const encryptedB64 = base64urlEncode(new Uint8Array(encrypted));
+  const iv = base64urlEncode(key.iv);
+  const expiration = opts.ttl ? now + opts.ttl : "";
+  const macBaseString = `${macPrefix}*${id}*${key.salt}*${iv}*${encryptedB64}*${expiration}`;
+  const mac = await hmacWithPassword(_crypto, integrity, opts.integrity, macBaseString);
+  const sealed = `${macBaseString}*${mac.salt}*${mac.digest}`;
+  return sealed;
+};
+var fixedTimeComparison = (a, b) => {
+  let mismatch = a.length === b.length ? 0 : 1;
+  if (mismatch)
+    b = a;
+  for (let i = 0; i < a.length; i += 1)
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return mismatch === 0;
+};
+var unseal = async (_crypto, sealed, password, options) => {
+  if (!password)
+    throw new Error("Empty password");
+  const opts = clone(options);
+  const now = Date.now() + (opts.localtimeOffsetMsec || 0);
+  const parts = sealed.split("*");
+  if (parts.length !== 8)
+    throw new Error("Incorrect number of sealed components");
+  const prefix = parts[0];
+  let passwordId = parts[1];
+  const encryptionSalt = parts[2];
+  const encryptionIv = parts[3];
+  const encryptedB64 = parts[4];
+  const expiration = parts[5];
+  const hmacSalt = parts[6];
+  const hmac = parts[7];
+  const macBaseString = `${prefix}*${passwordId}*${encryptionSalt}*${encryptionIv}*${encryptedB64}*${expiration}`;
+  if (macPrefix !== prefix)
+    throw new Error("Wrong mac prefix");
+  if (expiration) {
+    if (!/^\d+$/.test(expiration))
+      throw new Error("Invalid expiration");
+    const exp = Number.parseInt(expiration, 10);
+    if (exp <= now - opts.timestampSkewSec * 1e3)
+      throw new Error("Expired seal");
+  }
+  let pass = "";
+  passwordId = passwordId || "default";
+  if (typeof password === "string" || password instanceof Uint8Array)
+    pass = password;
+  else if (passwordId in password) {
+    pass = password[passwordId];
+  } else {
+    throw new Error(`Cannot find password: ${passwordId}`);
+  }
+  pass = normalizePassword(pass);
+  const macOptions = opts.integrity;
+  macOptions.salt = hmacSalt;
+  const mac = await hmacWithPassword(_crypto, pass.integrity, macOptions, macBaseString);
+  if (!fixedTimeComparison(mac.digest, hmac))
+    throw new Error("Bad hmac value");
+  const encrypted = base64urlDecode(encryptedB64);
+  const decryptOptions = opts.encryption;
+  decryptOptions.salt = encryptionSalt;
+  decryptOptions.iv = base64urlDecode(encryptionIv);
+  const decrypted = await decrypt(_crypto, pass.encryption, decryptOptions, encrypted);
+  if (decrypted)
+    return JSON.parse(decrypted);
+  return null;
+};
+
+function hasProp(obj, prop) {
+  try {
+    return prop in obj;
+  } catch {
+    return false;
+  }
+}
+
+var __defProp$2 = Object.defineProperty;
+var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField$2 = (obj, key, value) => {
+  __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+class H3Error extends Error {
+  constructor(message, opts = {}) {
+    super(message, opts);
+    __publicField$2(this, "statusCode", 500);
+    __publicField$2(this, "fatal", false);
+    __publicField$2(this, "unhandled", false);
+    __publicField$2(this, "statusMessage");
+    __publicField$2(this, "data");
+    __publicField$2(this, "cause");
+    if (opts.cause && !this.cause) {
+      this.cause = opts.cause;
+    }
+  }
+  toJSON() {
+    const obj = {
+      message: this.message,
+      statusCode: sanitizeStatusCode(this.statusCode, 500)
+    };
+    if (this.statusMessage) {
+      obj.statusMessage = sanitizeStatusMessage(this.statusMessage);
+    }
+    if (this.data !== void 0) {
+      obj.data = this.data;
+    }
+    return obj;
+  }
+}
+__publicField$2(H3Error, "__h3_error__", true);
+function createError(input) {
+  if (typeof input === "string") {
+    return new H3Error(input);
+  }
+  if (isError(input)) {
+    return input;
+  }
+  const err = new H3Error(input.message ?? input.statusMessage ?? "", {
+    cause: input.cause || input
+  });
+  if (hasProp(input, "stack")) {
+    try {
+      Object.defineProperty(err, "stack", {
+        get() {
+          return input.stack;
+        }
+      });
+    } catch {
+      try {
+        err.stack = input.stack;
+      } catch {
+      }
+    }
+  }
+  if (input.data) {
+    err.data = input.data;
+  }
+  if (input.statusCode) {
+    err.statusCode = sanitizeStatusCode(input.statusCode, err.statusCode);
+  } else if (input.status) {
+    err.statusCode = sanitizeStatusCode(input.status, err.statusCode);
+  }
+  if (input.statusMessage) {
+    err.statusMessage = input.statusMessage;
+  } else if (input.statusText) {
+    err.statusMessage = input.statusText;
+  }
+  if (err.statusMessage) {
+    const originalMessage = err.statusMessage;
+    const sanitizedMessage = sanitizeStatusMessage(err.statusMessage);
+    if (sanitizedMessage !== originalMessage) {
+      console.warn(
+        "[h3] Please prefer using `message` for longer error messages instead of `statusMessage`. In the future, `statusMessage` will be sanitized by default."
+      );
+    }
+  }
+  if (input.fatal !== void 0) {
+    err.fatal = input.fatal;
+  }
+  if (input.unhandled !== void 0) {
+    err.unhandled = input.unhandled;
+  }
+  return err;
+}
+function isError(input) {
+  return input?.constructor?.__h3_error__ === true;
+}
+function isMethod(event, expected, allowHead) {
+  if (typeof expected === "string") {
+    if (event.method === expected) {
+      return true;
+    }
+  } else if (expected.includes(event.method)) {
+    return true;
+  }
+  return false;
+}
+function assertMethod(event, expected, allowHead) {
+  if (!isMethod(event, expected)) {
+    throw createError({
+      statusCode: 405,
+      statusMessage: "HTTP method is not allowed."
+    });
+  }
+}
+function getRequestHost(event, opts = {}) {
+  if (opts.xForwardedHost) {
+    const xForwardedHost = event.node.req.headers["x-forwarded-host"];
+    if (xForwardedHost) {
+      return xForwardedHost;
+    }
+  }
+  return event.node.req.headers.host || "localhost";
+}
+function getRequestProtocol(event, opts = {}) {
+  if (opts.xForwardedProto !== false && event.node.req.headers["x-forwarded-proto"] === "https") {
+    return "https";
+  }
+  return event.node.req.connection?.encrypted ? "https" : "http";
+}
+function getRequestURL(event, opts = {}) {
+  const host = getRequestHost(event, opts);
+  const protocol = getRequestProtocol(event, opts);
+  const path = (event.node.req.originalUrl || event.path).replace(
+    /^[/\\]+/g,
+    "/"
+  );
+  return new URL(path, `${protocol}://${host}`);
+}
+
+const RawBodySymbol = Symbol.for("h3RawBody");
+const ParsedBodySymbol = Symbol.for("h3ParsedBody");
+const PayloadMethods$1 = ["PATCH", "POST", "PUT", "DELETE"];
+function readRawBody(event, encoding = "utf8") {
+  assertMethod(event, PayloadMethods$1);
+  const _rawBody = event._requestBody || event.web?.request?.body || event.node.req[RawBodySymbol] || event.node.req.rawBody || event.node.req.body;
+  if (_rawBody) {
+    const promise2 = Promise.resolve(_rawBody).then((_resolved) => {
+      if (Buffer.isBuffer(_resolved)) {
+        return _resolved;
+      }
+      if (typeof _resolved.pipeTo === "function") {
+        return new Promise((resolve, reject) => {
+          const chunks = [];
+          _resolved.pipeTo(
+            new WritableStream({
+              write(chunk) {
+                chunks.push(chunk);
+              },
+              close() {
+                resolve(Buffer.concat(chunks));
+              },
+              abort(reason) {
+                reject(reason);
+              }
+            })
+          ).catch(reject);
+        });
+      } else if (typeof _resolved.pipe === "function") {
+        return new Promise((resolve, reject) => {
+          const chunks = [];
+          _resolved.on("data", (chunk) => {
+            chunks.push(chunk);
+          }).on("end", () => {
+            resolve(Buffer.concat(chunks));
+          }).on("error", reject);
+        });
+      }
+      if (_resolved.constructor === Object) {
+        return Buffer.from(JSON.stringify(_resolved));
+      }
+      return Buffer.from(_resolved);
+    });
+    return encoding ? promise2.then((buff) => buff.toString(encoding)) : promise2;
+  }
+  if (!Number.parseInt(event.node.req.headers["content-length"] || "") && !String(event.node.req.headers["transfer-encoding"] ?? "").split(",").map((e) => e.trim()).filter(Boolean).includes("chunked")) {
+    return Promise.resolve(void 0);
+  }
+  const promise = event.node.req[RawBodySymbol] = new Promise(
+    (resolve, reject) => {
+      const bodyData = [];
+      event.node.req.on("error", (err) => {
+        reject(err);
+      }).on("data", (chunk) => {
+        bodyData.push(chunk);
+      }).on("end", () => {
+        resolve(Buffer.concat(bodyData));
+      });
+    }
+  );
+  const result = encoding ? promise.then((buff) => buff.toString(encoding)) : promise;
+  return result;
+}
+async function readBody(event, options = {}) {
+  const request = event.node.req;
+  if (hasProp(request, ParsedBodySymbol)) {
+    return request[ParsedBodySymbol];
+  }
+  const contentType = request.headers["content-type"] || "";
+  const body = await readRawBody(event);
+  let parsed;
+  if (contentType === "application/json") {
+    parsed = _parseJSON(body, options.strict ?? true);
+  } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+    parsed = _parseURLEncodedBody(body);
+  } else if (contentType.startsWith("text/")) {
+    parsed = body;
+  } else {
+    parsed = _parseJSON(body, options.strict ?? false);
+  }
+  request[ParsedBodySymbol] = parsed;
+  return parsed;
+}
+function _parseJSON(body = "", strict) {
+  if (!body) {
+    return void 0;
+  }
+  try {
+    return destr(body, { strict });
+  } catch {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Bad Request",
+      message: "Invalid JSON body"
+    });
+  }
+}
+function _parseURLEncodedBody(body) {
+  const form = new URLSearchParams(body);
+  const parsedForm = /* @__PURE__ */ Object.create(null);
+  for (const [key, value] of form.entries()) {
+    if (hasProp(parsedForm, key)) {
+      if (!Array.isArray(parsedForm[key])) {
+        parsedForm[key] = [parsedForm[key]];
+      }
+      parsedForm[key].push(value);
+    } else {
+      parsedForm[key] = value;
+    }
+  }
+  return parsedForm;
+}
+
+const DISALLOWED_STATUS_CHARS = /[^\u0009\u0020-\u007E]/g;
+function sanitizeStatusMessage(statusMessage = "") {
+  return statusMessage.replace(DISALLOWED_STATUS_CHARS, "");
+}
+function sanitizeStatusCode(statusCode, defaultStatusCode = 200) {
+  if (!statusCode) {
+    return defaultStatusCode;
+  }
+  if (typeof statusCode === "string") {
+    statusCode = Number.parseInt(statusCode, 10);
+  }
+  if (statusCode < 100 || statusCode > 999) {
+    return defaultStatusCode;
+  }
+  return statusCode;
+}
+
+function parseCookies(event) {
+  return parse(event.node.req.headers.cookie || "");
+}
+function getCookie(event, name) {
+  return parseCookies(event)[name];
+}
+function setCookie(event, name, value, serializeOptions) {
+  serializeOptions = { path: "/", ...serializeOptions };
+  const cookieStr = serialize(name, value, serializeOptions);
+  let setCookies = event.node.res.getHeader("set-cookie");
+  if (!Array.isArray(setCookies)) {
+    setCookies = [setCookies];
+  }
+  const _optionsHash = objectHash(serializeOptions);
+  setCookies = setCookies.filter((cookieValue) => {
+    return cookieValue && _optionsHash !== objectHash(parse(cookieValue));
+  });
+  event.node.res.setHeader("set-cookie", [...setCookies, cookieStr]);
+}
+
+typeof setImmediate === "undefined" ? (fn) => fn() : setImmediate;
+
+const getSessionPromise = Symbol("getSession");
+const DEFAULT_NAME = "h3";
+const DEFAULT_COOKIE = {
+  path: "/",
+  secure: true,
+  httpOnly: true
+};
+async function useSession(event, config) {
+  const sessionName = config.name || DEFAULT_NAME;
+  await getSession(event, config);
+  const sessionManager = {
+    get id() {
+      return event.context.sessions?.[sessionName]?.id;
+    },
+    get data() {
+      return event.context.sessions?.[sessionName]?.data || {};
+    },
+    update: async (update) => {
+      await updateSession(event, config, update);
+      return sessionManager;
+    },
+    clear: () => {
+      clearSession(event, config);
+      return Promise.resolve(sessionManager);
+    }
+  };
+  return sessionManager;
+}
+async function getSession(event, config) {
+  const sessionName = config.name || DEFAULT_NAME;
+  if (!event.context.sessions) {
+    event.context.sessions = /* @__PURE__ */ Object.create(null);
+  }
+  const existingSession = event.context.sessions[sessionName];
+  if (existingSession) {
+    return existingSession[getSessionPromise] || existingSession;
+  }
+  const session = {
+    id: "",
+    createdAt: 0,
+    data: /* @__PURE__ */ Object.create(null)
+  };
+  event.context.sessions[sessionName] = session;
+  let sealedSession;
+  if (config.sessionHeader !== false) {
+    const headerName = typeof config.sessionHeader === "string" ? config.sessionHeader.toLowerCase() : `x-${sessionName.toLowerCase()}-session`;
+    const headerValue = event.node.req.headers[headerName];
+    if (typeof headerValue === "string") {
+      sealedSession = headerValue;
+    }
+  }
+  if (!sealedSession) {
+    sealedSession = getCookie(event, sessionName);
+  }
+  if (sealedSession) {
+    const promise = unsealSession(event, config, sealedSession).catch(() => {
+    }).then((unsealed) => {
+      Object.assign(session, unsealed);
+      delete event.context.sessions[sessionName][getSessionPromise];
+      return session;
+    });
+    event.context.sessions[sessionName][getSessionPromise] = promise;
+    await promise;
+  }
+  if (!session.id) {
+    session.id = config.generateId?.() ?? (config.crypto || _crypto).randomUUID();
+    session.createdAt = Date.now();
+    await updateSession(event, config);
+  }
+  return session;
+}
+async function updateSession(event, config, update) {
+  const sessionName = config.name || DEFAULT_NAME;
+  const session = event.context.sessions?.[sessionName] || await getSession(event, config);
+  if (typeof update === "function") {
+    update = update(session.data);
+  }
+  if (update) {
+    Object.assign(session.data, update);
+  }
+  if (config.cookie !== false) {
+    const sealed = await sealSession(event, config);
+    setCookie(event, sessionName, sealed, {
+      ...DEFAULT_COOKIE,
+      expires: config.maxAge ? new Date(session.createdAt + config.maxAge * 1e3) : void 0,
+      ...config.cookie
+    });
+  }
+  return session;
+}
+async function sealSession(event, config) {
+  const sessionName = config.name || DEFAULT_NAME;
+  const session = event.context.sessions?.[sessionName] || await getSession(event, config);
+  const sealed = await seal(config.crypto || _crypto, session, config.password, {
+    ...defaults,
+    ttl: config.maxAge ? config.maxAge * 1e3 : 0,
+    ...config.seal
+  });
+  return sealed;
+}
+async function unsealSession(_event, config, sealed) {
+  const unsealed = await unseal(
+    config.crypto || _crypto,
+    sealed,
+    config.password,
+    {
+      ...defaults,
+      ttl: config.maxAge ? config.maxAge * 1e3 : 0,
+      ...config.seal
+    }
+  );
+  if (config.maxAge) {
+    const age = Date.now() - (unsealed.createdAt || Number.NEGATIVE_INFINITY);
+    if (age > config.maxAge * 1e3) {
+      throw new Error("Session expired!");
+    }
+  }
+  return unsealed;
+}
+function clearSession(event, config) {
+  const sessionName = config.name || DEFAULT_NAME;
+  if (event.context.sessions?.[sessionName]) {
+    delete event.context.sessions[sessionName];
+  }
+  setCookie(event, sessionName, "", {
+    ...DEFAULT_COOKIE,
+    ...config.cookie
+  });
+  return Promise.resolve();
+}
+
+function defineEventHandler(handler) {
+  if (typeof handler === "function") {
+    handler.__is_handler__ = true;
+    return handler;
+  }
+  const _hooks = {
+    onRequest: _normalizeArray(handler.onRequest),
+    onBeforeResponse: _normalizeArray(handler.onBeforeResponse)
+  };
+  const _handler = (event) => {
+    return _callHandler(event, handler.handler, _hooks);
+  };
+  _handler.__is_handler__ = true;
+  _handler.__resolve__ = handler.handler.__resolve__;
+  _handler.__websocket__ = handler.websocket;
+  return _handler;
+}
+function _normalizeArray(input) {
+  return input ? Array.isArray(input) ? input : [input] : void 0;
+}
+async function _callHandler(event, handler, hooks) {
+  if (hooks.onRequest) {
+    for (const hook of hooks.onRequest) {
+      await hook(event);
+      if (event.handled) {
+        return;
+      }
+    }
+  }
+  const body = await handler(event);
+  const response = { body };
+  if (hooks.onBeforeResponse) {
+    for (const hook of hooks.onBeforeResponse) {
+      await hook(event, response);
+    }
+  }
+  return response.body;
+}
+const eventHandler = defineEventHandler;
+
+const useSessionX = (event) => useSessionX(event, useRuntimeConfig().session);
+
+const _9rzr2O = defineEventHandler(async (event) => {
+  let session = await useSessionX(event);
+  console.log("New request: " + getRequestURL(event), session.data);
+});
+
+const _8VAOvK = defineEventHandler(async (event) => {
+  const session = await useSession(event, {
+    password: "your_secure_session_password",
+    // Secure password for session encryption
+    cookie: {
+      httpOnly: true,
+      // Cookie can only be accessed by the server, preventing client-side access (security measure)
+      maxAge: 60 * 60 * 24 * 365,
+      // Set cookie expiration to 1 year
+      secure: true
+      // Use secure cookies (HTTPS) in production environments
+    }
+  });
+  event.context.session = session;
+});
+
+const _lazy_ziCXF6 = () => import('./routes/api/auth/login.post.mjs');
+const _lazy_5oLGLm = () => import('./routes/api/session/bar.get.mjs');
+const _lazy_5AH41C = () => import('./routes/api/session/foo.get.mjs');
+const _lazy_myI1zL = () => import('./routes/api/test.get.mjs');
 const _lazy_maJPtv = () => import('./routes/renderer.mjs').then(function (n) { return n.r; });
 
 const handlers = [
   { route: '', handler: _f4b49z, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: authMiddleware, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _9rzr2O, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _8VAOvK, lazy: false, middleware: true, method: undefined },
+  { route: '/api/auth/login', handler: _lazy_ziCXF6, lazy: true, middleware: false, method: "post" },
+  { route: '/api/session/bar', handler: _lazy_5oLGLm, lazy: true, middleware: false, method: "get" },
+  { route: '/api/session/foo', handler: _lazy_5AH41C, lazy: true, middleware: false, method: "get" },
+  { route: '/api/test', handler: _lazy_myI1zL, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_maJPtv, lazy: true, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_maJPtv, lazy: true, middleware: false, method: undefined }
 ];
@@ -5606,7 +6896,7 @@ function createNitroApp() {
   globalThis.$fetch = $fetch;
   h3App.use(createRouteRulesHandler({ localFetch }));
   h3App.use(
-    eventHandler((event) => {
+    eventHandler$1((event) => {
       event.context.nitro = event.context.nitro || { errors: [] };
       const envContext = event.node.req?.__unenv__;
       if (envContext) {
@@ -5922,5 +7212,5 @@ trapUnhandledNodeErrors();
 setupGracefulShutdown(listener, nitroApp);
 const nodeServer = {};
 
-export { send as a, setResponseStatus as b, useNitroApp as c, setResponseHeaders as d, eventHandler as e, getQuery as f, getResponseStatus as g, createError$1 as h, getRouteRules as i, joinRelativeURL as j, getResponseStatusText as k, destr as l, defu as m, nodeServer as n, setResponseHeader as s, useRuntimeConfig as u };
+export { useRuntimeConfig as a, eventHandler$1 as b, createError as c, defineEventHandler as d, eventHandler as e, send as f, getResponseStatus as g, setResponseStatus as h, useNitroApp as i, setResponseHeaders as j, joinRelativeURL as k, getQuery as l, createError$2 as m, getRouteRules as n, getResponseStatusText as o, destr as p, sanitizeStatusCode as q, readBody as r, setResponseHeader as s, defu as t, useSessionX as u, nodeServer as v };
 //# sourceMappingURL=runtime.mjs.map

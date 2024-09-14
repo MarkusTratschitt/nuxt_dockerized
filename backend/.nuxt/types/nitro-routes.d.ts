@@ -6,6 +6,15 @@ declare module 'nitropack' {
     '/api/auth/login': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/login.post').default>>>>
     }
+    '/api/session/bar': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/session/bar.get').default>>>>
+    }
+    '/api/session/foo': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/session/foo.get').default>>>>
+    }
+    '/api/test': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/test.get').default>>>>
+    }
     '/__nuxt_error': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../../node_modules/nuxt/dist/core/runtime/nitro/renderer').default>>>>
     }

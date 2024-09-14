@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
 
-  modules: ['@nuxt/image', '@nuxt/icon', 'nuxt-security'],
+  modules: ['@nuxt/image', '@nuxt/icon', '@pinia/nuxt', 'nuxt-security'],
     image: {
         // Optionale Konfigurationen
         dir: 'assets/images',

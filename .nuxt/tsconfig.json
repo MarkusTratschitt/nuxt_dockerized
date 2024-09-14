@@ -86,6 +86,9 @@
       "#image/*": [
         "../node_modules/@nuxt/image/dist/runtime/*"
       ],
+      "pinia": [
+        "../node_modules/pinia/dist/pinia"
+      ],
       "#vue-router": [
         "../node_modules/vue-router"
       ],
@@ -93,7 +96,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/225a1b46-d9d0-4b0c-ae5f-ee5b889522f3.json"
+        "./manifest/meta/836d03ea-23de-48ce-af68-3f0507847f87.json"
       ],
       "#build": [
         "."
@@ -141,6 +144,10 @@
     "../node_modules/@nuxt/image/dist/runtime",
     "../node_modules/@nuxt/icon/runtime",
     "../node_modules/@nuxt/icon/dist/runtime",
+    "../node_modules/@pinia/nuxt/runtime",
+    "../node_modules/@pinia/nuxt/dist/runtime",
+    "../node_modules/nuxt-security/runtime",
+    "../node_modules/nuxt-security/dist/runtime",
     "../node_modules/@nuxt/devtools/runtime",
     "../node_modules/@nuxt/devtools/dist/runtime",
     "../node_modules/@nuxt/telemetry/runtime",
@@ -155,6 +162,10 @@
     "../node_modules/@nuxt/image/dist/runtime/server",
     "../node_modules/@nuxt/icon/runtime/server",
     "../node_modules/@nuxt/icon/dist/runtime/server",
+    "../node_modules/@pinia/nuxt/runtime/server",
+    "../node_modules/@pinia/nuxt/dist/runtime/server",
+    "../node_modules/nuxt-security/runtime/server",
+    "../node_modules/nuxt-security/dist/runtime/server",
     "../node_modules/@nuxt/devtools/runtime/server",
     "../node_modules/@nuxt/devtools/dist/runtime/server",
     "../node_modules/@nuxt/telemetry/runtime/server",
