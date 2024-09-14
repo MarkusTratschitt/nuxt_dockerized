@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # backend/entrypoint.sh
 
 # Entrypoint for the backend

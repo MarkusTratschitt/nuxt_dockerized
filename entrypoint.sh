@@ -1,4 +1,6 @@
-# backend/entrypoint.sh
+#!/bin/sh
+
+# /entrypoint.sh
 
 # Entrypoint for the backend
 
