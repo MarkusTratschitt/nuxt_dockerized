@@ -13,8 +13,10 @@
   "dependencies": {
     "@nuxt/icon": "^1.5.1",
     "@nuxt/image": "^1.8.0",
+    "@pinia/nuxt": "^0.5.4",
     "@prisma/client": "^5.19.1",
     "bcrypt": "^5.1.1",
+    "crypto-js": "^4.2.0",
     "less": "^4.2.0",
     "less-loader": "^12.2.0",
     "nuxt": "^3.13.0",
