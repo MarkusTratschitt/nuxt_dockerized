@@ -207,6 +207,6 @@ if (import.meta.hot) {
   })
 }
 
+import cfg0 from "/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/app.config.ts"
 
-
-export default /*@__PURE__*/ defuFn(inlineConfig)
+export default /*@__PURE__*/ defuFn(cfg0, inlineConfig)
