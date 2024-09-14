@@ -243,3 +243,82 @@ Next steps:
 More information in our documentation:
 https://pris.ly/d/getting-started
 ```
+
+Models have to be defined in the `nuxt-app/backend/prisma/schema.prisma` file like
+
+```sh
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Define the Prisma Client generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define the database connection
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define models here
+
+model <NameOfYourMoodel> {
+    Primary_Key_ID    Int      @id @default(autoincrement())
+    Foreign_Key_Name    Name[]
+}
+```
+
+Migrations for `prisma` next
+
+```sh
+npx prisma migrate dev --name init
+```
+
+Don't get nervous when the output in the console looks like
+
+```sh
+Environment variables loaded from ../.env
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": MySQL database "rollout_db" at "localhost:3306"
+
+Error: P1001: Can't reach database server at `localhost:3306`
+
+Please make sure your database server is running at `localhost:3306`.
+```
+
+Just go on and generate your `prisma-client`
+
+```sh
+npx prisma generate
+```
+
+That's what we wanted to see
+
+```sh
+Environment variables loaded from ../.env
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.19.1) to ./../node_modules/@prisma/client in 132ms
+
+Start by importing your Prisma Client (See: http://pris.ly/d/importing-client)
+
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
+```
+
+Next create a file `nuxt-app/backend/prisma/prisma.ts`and paste in the following
+
+```typescript
+// nuxt-app/backend/prisma/prisma.ts
+
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+export default prisma
+```
