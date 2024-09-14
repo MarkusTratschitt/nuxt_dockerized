@@ -57,3 +57,6 @@ volumes/
 # Docker service output/logs
 *.log
 
+# keys and certs
+.crt
+.key
