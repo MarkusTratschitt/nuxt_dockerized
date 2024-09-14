@@ -68,23 +68,14 @@
       "public": [
         "../public"
       ],
-      "public/*": [
-        "../public/*"
-      ],
       "#app": [
-        "../node_modules/nuxt/dist/app"
+        "../../node_modules/nuxt/dist/app"
       ],
       "#app/*": [
-        "../node_modules/nuxt/dist/app/*"
+        "../../node_modules/nuxt/dist/app/*"
       ],
       "vue-demi": [
-        "../node_modules/nuxt/dist/app/compat/vue-demi"
-      ],
-      "#image": [
-        "../node_modules/@nuxt/image/dist/runtime"
-      ],
-      "#image/*": [
-        "../node_modules/@nuxt/image/dist/runtime/*"
+        "../../node_modules/nuxt/dist/app/compat/vue-demi"
       ],
       "#vue-router": [
         "../node_modules/vue-router"
@@ -93,7 +84,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/6cae0b69-dc52-490a-b734-6c1be8fe85e7.json"
+        "./manifest/meta/e8e36e5e-2536-4ae3-88ff-8dc87dbd4d5b.json"
       ],
       "#build": [
         "."
@@ -137,24 +128,19 @@
     "./nuxt.d.ts",
     "../.config/nuxt.*",
     "../**/*",
-    "../node_modules/@nuxt/image/runtime",
-    "../node_modules/@nuxt/image/dist/runtime",
-    "../node_modules/@nuxt/icon/runtime",
-    "../node_modules/@nuxt/icon/dist/runtime",
     "../node_modules/@nuxt/devtools/runtime",
     "../node_modules/@nuxt/devtools/dist/runtime",
     "../node_modules/@nuxt/telemetry/runtime",
     "../node_modules/@nuxt/telemetry/dist/runtime",
-    ".."
+    "..",
+    "../../node_modules/nuxt/dist/app",
+    "../../node_modules/nuxt/dist/app/compat/vue-demi"
   ],
   "exclude": [
     "../dist",
     "../node_modules",
-    "../node_modules/nuxt/node_modules",
-    "../node_modules/@nuxt/image/runtime/server",
-    "../node_modules/@nuxt/image/dist/runtime/server",
-    "../node_modules/@nuxt/icon/runtime/server",
-    "../node_modules/@nuxt/icon/dist/runtime/server",
+    "../../node_modules",
+    "../../node_modules/nuxt/node_modules",
     "../node_modules/@nuxt/devtools/runtime/server",
     "../node_modules/@nuxt/devtools/dist/runtime/server",
     "../node_modules/@nuxt/telemetry/runtime/server",
