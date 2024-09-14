@@ -12,7 +12,7 @@ RUN npm install
 # Copy the rest of the application code into the container
 COPY . .
 
-# Build the frontend application
+# Build the frontend application (this will output the static files to the `dist` folder)
 RUN npm run build
 
 # Stage 2: Serve the static files with Nginx
@@ -21,13 +21,13 @@ FROM nginx:alpine
 # Remove default Nginx static files
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy the build output from the previous stage
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copy the build output from the Node.js build stage to Nginx
+COPY --from=build /app/.output/public /usr/share/nginx/html
 
 # Copy custom Nginx configuration
-COPY ./nginx/nginx.conf etc/nginx/nginx.conf
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Copy the self-signed SSL certificate and key
+# Copy the self-signed SSL certificate and key (falls verwendet)
 COPY ./selfsigned.crt /etc/nginx/ssl/selfsigned.crt
 COPY ./selfsigned.key /etc/nginx/ssl/selfsigned.key
 
