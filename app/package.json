@@ -1,14 +1,14 @@
 {
-  "name": "nuxt-app",
+  "name": "backend",
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "nuxt start",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "start": "nuxt start" 
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@nuxt/icon": "^1.5.1",
