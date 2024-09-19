@@ -8,7 +8,7 @@
 /*  res: Response,  // Express response object, used to send responses to the client
 /*  next: NextFunction  // Function to pass control to the next middleware if authentication succeeds
 /*) {
-/*  // Check if the session contains a 'user' object, indicating the user is authenticated
+/*  Check if the session contains a 'user' object, indicating the user is authenticated
 /*  const user = req.session?.user;
 /*
 /*  if (user) {
