@@ -3,38 +3,32 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdirSync } from 'node:fs';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, isEvent, createEvent, fetchWithEvent, getRequestHeader, eventHandler, setHeaders, sendRedirect, proxyRequest, createError, setResponseHeader, send, getResponseStatus, setResponseStatus, setResponseHeaders, getResponseHeader, removeResponseHeader, getRequestHeaders, getQuery as getQuery$1, handleCors, getRequestIP, readMultipartFormData, readBody, lazyEventHandler, useBase, createApp, createRouter as createRouter$1, toNodeListener, getRouterParam, getResponseStatusText } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/h3/dist/index.mjs';
-import { getRequestDependencies, getPreloadLinks, getPrefetchLinks, createRenderer } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { stringify, uneval } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/devalue/index.js';
-import destr from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/destr/dist/index.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, joinRelativeURL } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/ufo/dist/index.mjs';
-import { renderToString } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/vue/server-renderer/index.mjs';
-import { propsToString, renderSSRHead } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/@unhead/ssr/dist/index.mjs';
-import { createFetch as createFetch$1, Headers as Headers$1 } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/ofetch/dist/node.mjs';
-import { createCall, createFetch } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/unenv/runtime/fetch/index.mjs';
-import { createHooks } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/hookable/dist/index.mjs';
-import { klona } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/klona/dist/index.mjs';
-import { snakeCase } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/scule/dist/index.mjs';
-import defu, { defuFn, createDefu } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/defu/dist/defu.mjs';
-import { hash } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/ohash/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/unstorage/drivers/fs.mjs';
-import unstorage_47drivers_47lru_45cache from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/unstorage/drivers/lru-cache.mjs';
-import { toRouteMatcher, createRouter } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/radix3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, isEvent, createEvent, fetchWithEvent, getRequestHeader, eventHandler, setHeaders, sendRedirect, proxyRequest, createError, setResponseHeader, send, getResponseStatus, setResponseStatus, setResponseHeaders, getRequestHeaders, getCookie, sendError, getRequestURL, useSession, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, getQuery as getQuery$1, readBody, setCookie, getResponseStatusText } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/h3/dist/index.mjs';
+import { PrismaClient } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/@prisma/client/default.js';
+import bcrypt from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/bcrypt/bcrypt.js';
+import { getRequestDependencies, getPreloadLinks, getPrefetchLinks, createRenderer } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { stringify, uneval } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/devalue/index.js';
+import destr from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/destr/dist/index.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, joinRelativeURL } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/ufo/dist/index.mjs';
+import { renderToString } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/vue/server-renderer/index.mjs';
+import { propsToString, renderSSRHead } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/@unhead/ssr/dist/index.mjs';
+import { createFetch as createFetch$1, Headers as Headers$1 } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/ofetch/dist/node.mjs';
+import { createCall, createFetch } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/unenv/runtime/fetch/index.mjs';
+import { createHooks } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/hookable/dist/index.mjs';
+import { klona } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/klona/dist/index.mjs';
+import { snakeCase } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/scule/dist/index.mjs';
+import defu, { defuFn } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/defu/dist/defu.mjs';
+import { hash } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/ohash/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/unstorage/drivers/fs.mjs';
+import { toRouteMatcher, createRouter } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/radix3/dist/index.mjs';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { consola } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/consola/dist/index.mjs';
-import { getContext } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/unctx/dist/index.mjs';
-import { captureRawStackTrace, parseRawStackTrace } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/errx/dist/index.js';
-import { isVNode, version, unref } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/vue/index.mjs';
-import crypto from 'node:crypto';
-import { basename, isAbsolute } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/pathe/dist/index.mjs';
-import { getIcons } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/@iconify/utils/lib/index.mjs';
-import { collections } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.nuxt/nuxt-icon-server-bundle.mjs';
-import { FilterXSS } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/xss/lib/index.js';
-import { fileURLToPath } from 'node:url';
-import { ipxFSStorage, ipxHttpStorage, createIPX, createIPXH3Handler } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/ipx/dist/index.mjs';
-import { createServerHead as createServerHead$1, CapoPlugin } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/unhead/dist/index.mjs';
-import { defineHeadPlugin } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/node_modules/@unhead/shared/dist/index.mjs';
+import { consola } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/consola/dist/index.mjs';
+import { getContext } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/unctx/dist/index.mjs';
+import { captureRawStackTrace, parseRawStackTrace } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/errx/dist/index.js';
+import { isVNode, version, unref } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/vue/index.mjs';
+import { createServerHead as createServerHead$1, CapoPlugin } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/unhead/dist/index.mjs';
+import { defineHeadPlugin } from 'file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/node_modules/@unhead/shared/dist/index.mjs';
 
 const r=Object.create(null),E=e=>globalThis.process?.env||globalThis._importMeta_.env||globalThis.Deno?.env.toObject()||globalThis.__env__||(e?r:globalThis),s=new Proxy(r,{get(e,o){return E()[o]??r[o]},has(e,o){const i=E();return o in i||o in r},set(e,o,i){const g=E(!0);return g[o]=i,!0},deleteProperty(e,o){if(!o)return !1;const i=E(!0);return delete i[o],!0},ownKeys(){const e=E(!0);return Object.keys(e)}}),t=typeof process<"u"&&process.env&&"development"||"",p=[["APPVEYOR"],["AWS_AMPLIFY","AWS_APP_ID",{ci:!0}],["AZURE_PIPELINES","SYSTEM_TEAMFOUNDATIONCOLLECTIONURI"],["AZURE_STATIC","INPUT_AZURE_STATIC_WEB_APPS_API_TOKEN"],["APPCIRCLE","AC_APPCIRCLE"],["BAMBOO","bamboo_planKey"],["BITBUCKET","BITBUCKET_COMMIT"],["BITRISE","BITRISE_IO"],["BUDDY","BUDDY_WORKSPACE_ID"],["BUILDKITE"],["CIRCLE","CIRCLECI"],["CIRRUS","CIRRUS_CI"],["CLOUDFLARE_PAGES","CF_PAGES",{ci:!0}],["CODEBUILD","CODEBUILD_BUILD_ARN"],["CODEFRESH","CF_BUILD_ID"],["DRONE"],["DRONE","DRONE_BUILD_EVENT"],["DSARI"],["GITHUB_ACTIONS"],["GITLAB","GITLAB_CI"],["GITLAB","CI_MERGE_REQUEST_ID"],["GOCD","GO_PIPELINE_LABEL"],["LAYERCI"],["HUDSON","HUDSON_URL"],["JENKINS","JENKINS_URL"],["MAGNUM"],["NETLIFY"],["NETLIFY","NETLIFY_LOCAL",{ci:!1}],["NEVERCODE"],["RENDER"],["SAIL","SAILCI"],["SEMAPHORE"],["SCREWDRIVER"],["SHIPPABLE"],["SOLANO","TDDIUM"],["STRIDER"],["TEAMCITY","TEAMCITY_VERSION"],["TRAVIS"],["VERCEL","NOW_BUILDER"],["VERCEL","VERCEL",{ci:!1}],["VERCEL","VERCEL_ENV",{ci:!1}],["APPCENTER","APPCENTER_BUILD_ID"],["CODESANDBOX","CODESANDBOX_SSE",{ci:!1}],["STACKBLITZ"],["STORMKIT"],["CLEAVR"],["ZEABUR"],["CODESPHERE","CODESPHERE_APP_ID",{ci:!0}],["RAILWAY","RAILWAY_PROJECT_ID"],["RAILWAY","RAILWAY_SERVICE_ID"]];function B(){if(globalThis.process?.env)for(const e of p){const o=e[1]||e[0];if(globalThis.process?.env[o])return {name:e[0].toLowerCase(),...e[2]}}return globalThis.process?.env?.SHELL==="/bin/jsh"&&globalThis.process?.versions?.webcontainer?{name:"stackblitz",ci:!1}:{name:"",ci:!1}}const l=B(),d=l.name;function n(e){return e?e!=="false":!1}const I=globalThis.process?.platform||"",T=n(s.CI)||l.ci!==!1,R=n(globalThis.process?.stdout&&globalThis.process?.stdout.isTTY);n(s.DEBUG);const C=t==="test"||n(s.TEST);n(s.MINIMAL)||T||C||!R;const a=/^win/i.test(I);!n(s.NO_COLOR)&&(n(s.FORCE_COLOR)||(R||a)&&s.TERM!=="dumb"||T);const _=(globalThis.process?.versions?.node||"").replace(/^v/,"")||null;Number(_?.split(".")[0])||null;const W=globalThis.process||Object.create(null),c={versions:{}};new Proxy(W,{get(e,o){if(o==="env")return s;if(o in e)return e[o];if(o in c)return c[o]}});const A=globalThis.process?.release?.name==="node",L=!!globalThis.Bun||!!globalThis.process?.versions?.bun,D=!!globalThis.Deno,O=!!globalThis.fastly,S=!!globalThis.Netlify,N=!!globalThis.EdgeRuntime,u=globalThis.navigator?.userAgent==="Cloudflare-Workers",b=!!globalThis.__lagon__,F=[[S,"netlify"],[N,"edge-light"],[u,"workerd"],[O,"fastly"],[D,"deno"],[L,"bun"],[A,"node"],[b,"lagon"]];function G(){const e=F.find(o=>o[0]);if(e)return {name:e[1]}}const P=G();P?.name||"";
 
@@ -76,221 +70,13 @@ function _expandFromEnv(value) {
   });
 }
 
-const defineAppConfig = (config) => config;
-
-const appConfig0 = defineAppConfig({
-  icon: {
-    size: "24px",
-    // default <Icon> size applied
-    class: "icon",
-    // default <Icon> class applied
-    mode: "css",
-    // default <Icon> mode applied
-    aliases: {
-      "nuxt": "logos:nuxt-icon"
-    }
-  }
-});
-
 const inlineAppConfig = {
-  "nuxt": {},
-  "icon": {
-    "provider": "server",
-    "class": "",
-    "aliases": {},
-    "iconifyApiEndpoint": "https://api.iconify.design",
-    "localApiEndpoint": "/api/_nuxt_icon",
-    "fallbackToApi": true,
-    "cssSelectorPrefix": "i-",
-    "cssWherePseudo": true,
-    "mode": "css",
-    "attrs": {
-      "aria-hidden": true
-    },
-    "collections": [
-      "academicons",
-      "akar-icons",
-      "ant-design",
-      "arcticons",
-      "basil",
-      "bi",
-      "bitcoin-icons",
-      "bpmn",
-      "brandico",
-      "bx",
-      "bxl",
-      "bxs",
-      "bytesize",
-      "carbon",
-      "catppuccin",
-      "cbi",
-      "charm",
-      "ci",
-      "cib",
-      "cif",
-      "cil",
-      "circle-flags",
-      "circum",
-      "clarity",
-      "codicon",
-      "covid",
-      "cryptocurrency",
-      "cryptocurrency-color",
-      "dashicons",
-      "devicon",
-      "devicon-plain",
-      "ei",
-      "el",
-      "emojione",
-      "emojione-monotone",
-      "emojione-v1",
-      "entypo",
-      "entypo-social",
-      "eos-icons",
-      "ep",
-      "et",
-      "eva",
-      "f7",
-      "fa",
-      "fa-brands",
-      "fa-regular",
-      "fa-solid",
-      "fa6-brands",
-      "fa6-regular",
-      "fa6-solid",
-      "fad",
-      "fe",
-      "feather",
-      "file-icons",
-      "flag",
-      "flagpack",
-      "flat-color-icons",
-      "flat-ui",
-      "flowbite",
-      "fluent",
-      "fluent-emoji",
-      "fluent-emoji-flat",
-      "fluent-emoji-high-contrast",
-      "fluent-mdl2",
-      "fontelico",
-      "fontisto",
-      "formkit",
-      "foundation",
-      "fxemoji",
-      "gala",
-      "game-icons",
-      "geo",
-      "gg",
-      "gis",
-      "gravity-ui",
-      "gridicons",
-      "grommet-icons",
-      "guidance",
-      "healthicons",
-      "heroicons",
-      "heroicons-outline",
-      "heroicons-solid",
-      "hugeicons",
-      "humbleicons",
-      "ic",
-      "icomoon-free",
-      "icon-park",
-      "icon-park-outline",
-      "icon-park-solid",
-      "icon-park-twotone",
-      "iconamoon",
-      "iconoir",
-      "icons8",
-      "il",
-      "ion",
-      "iwwa",
-      "jam",
-      "la",
-      "lets-icons",
-      "line-md",
-      "logos",
-      "ls",
-      "lucide",
-      "lucide-lab",
-      "mage",
-      "majesticons",
-      "maki",
-      "map",
-      "marketeq",
-      "material-symbols",
-      "material-symbols-light",
-      "mdi",
-      "mdi-light",
-      "medical-icon",
-      "memory",
-      "meteocons",
-      "mi",
-      "mingcute",
-      "mono-icons",
-      "mynaui",
-      "nimbus",
-      "nonicons",
-      "noto",
-      "noto-v1",
-      "octicon",
-      "oi",
-      "ooui",
-      "openmoji",
-      "oui",
-      "pajamas",
-      "pepicons",
-      "pepicons-pencil",
-      "pepicons-pop",
-      "pepicons-print",
-      "ph",
-      "pixelarticons",
-      "prime",
-      "ps",
-      "quill",
-      "radix-icons",
-      "raphael",
-      "ri",
-      "rivet-icons",
-      "si-glyph",
-      "simple-icons",
-      "simple-line-icons",
-      "skill-icons",
-      "solar",
-      "streamline",
-      "streamline-emojis",
-      "subway",
-      "svg-spinners",
-      "system-uicons",
-      "tabler",
-      "tdesign",
-      "teenyicons",
-      "token",
-      "token-branded",
-      "topcoat",
-      "twemoji",
-      "typcn",
-      "uil",
-      "uim",
-      "uis",
-      "uit",
-      "uiw",
-      "unjs",
-      "vaadin",
-      "vs",
-      "vscode-icons",
-      "websymbol",
-      "weui",
-      "whh",
-      "wi",
-      "wpf",
-      "zmdi",
-      "zondicons"
-    ],
-    "fetchTimeout": 500
-  }
+  "nuxt": {}
 };
 
-const appConfig = defuFn(appConfig0, inlineAppConfig);
+
+
+const appConfig = defuFn(inlineAppConfig);
 
 const _inlineRuntimeConfig = {
   "app": {
@@ -305,17 +91,6 @@ const _inlineRuntimeConfig = {
       "/__nuxt_error": {
         "cache": false
       },
-      "/**": {
-        "headers": {
-          "Referrer-Policy": "no-referrer",
-          "Strict-Transport-Security": "max-age=15552000; includeSubDomains;",
-          "X-Content-Type-Options": "nosniff",
-          "X-Download-Options": "noopen",
-          "X-Frame-Options": "SAMEORIGIN",
-          "X-Permitted-Cross-Domain-Policies": "none",
-          "X-XSS-Protection": "0"
-        }
-      },
       "/_nuxt/builds/meta/**": {
         "headers": {
           "cache-control": "public, max-age=31536000, immutable"
@@ -328,155 +103,7 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "public": {},
-  "icon": {
-    "serverKnownCssClasses": []
-  },
-  "private": {
-    "basicAuth": false
-  },
-  "security": {
-    "strict": false,
-    "headers": {
-      "crossOriginResourcePolicy": "same-origin",
-      "crossOriginOpenerPolicy": "same-origin",
-      "crossOriginEmbedderPolicy": "credentialless",
-      "contentSecurityPolicy": {
-        "base-uri": [
-          "'none'"
-        ],
-        "font-src": [
-          "'self'",
-          "https:",
-          "data:"
-        ],
-        "form-action": [
-          "'self'"
-        ],
-        "frame-ancestors": [
-          "'self'"
-        ],
-        "img-src": [
-          "'self'",
-          "data:"
-        ],
-        "object-src": [
-          "'none'"
-        ],
-        "script-src-attr": [
-          "'none'"
-        ],
-        "style-src": [
-          "'self'",
-          "https:",
-          "'unsafe-inline'"
-        ],
-        "script-src": [
-          "'self'",
-          "https:",
-          "'unsafe-inline'",
-          "'strict-dynamic'",
-          "'nonce-{{nonce}}'"
-        ],
-        "upgrade-insecure-requests": true
-      },
-      "originAgentCluster": "?1",
-      "referrerPolicy": "no-referrer",
-      "strictTransportSecurity": {
-        "maxAge": 15552000,
-        "includeSubdomains": true
-      },
-      "xContentTypeOptions": "nosniff",
-      "xDNSPrefetchControl": "off",
-      "xDownloadOptions": "noopen",
-      "xFrameOptions": "SAMEORIGIN",
-      "xPermittedCrossDomainPolicies": "none",
-      "xXSSProtection": "0",
-      "permissionsPolicy": {
-        "camera": [],
-        "display-capture": [],
-        "fullscreen": [],
-        "geolocation": [],
-        "microphone": []
-      }
-    },
-    "requestSizeLimiter": {
-      "maxRequestSizeInBytes": 2000000,
-      "maxUploadFileRequestInBytes": 8000000,
-      "throwError": true
-    },
-    "rateLimiter": {
-      "tokensPerInterval": 150,
-      "interval": 300000,
-      "headers": false,
-      "driver": {
-        "name": "lruCache"
-      },
-      "throwError": true
-    },
-    "xssValidator": {
-      "methods": [
-        "GET",
-        "POST"
-      ],
-      "throwError": true
-    },
-    "corsHandler": {
-      "origin": "http://localhost:3000",
-      "methods": [
-        "GET",
-        "HEAD",
-        "PUT",
-        "PATCH",
-        "POST",
-        "DELETE"
-      ],
-      "preflight": {
-        "statusCode": 204
-      }
-    },
-    "allowedMethodsRestricter": {
-      "methods": "*",
-      "throwError": true
-    },
-    "hidePoweredBy": true,
-    "enabled": true,
-    "csrf": false,
-    "nonce": true,
-    "removeLoggers": {
-      "external": [],
-      "consoleType": [
-        "log",
-        "debug"
-      ],
-      "include": [
-        {},
-        {}
-      ],
-      "exclude": [
-        {},
-        {}
-      ]
-    },
-    "ssg": {
-      "meta": true,
-      "hashScripts": true,
-      "hashStyles": false,
-      "nitroHeaders": true,
-      "exportToPresets": true
-    },
-    "sri": true
-  },
-  "ipx": {
-    "baseURL": "/_ipx",
-    "alias": {},
-    "fs": {
-      "dir": []
-    },
-    "http": {
-      "domains": []
-    }
-  }
+  "public": {}
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -498,12 +125,7 @@ function useRuntimeConfig(event) {
   event.context.nitro.runtimeConfig = runtimeConfig;
   return runtimeConfig;
 }
-const _sharedAppConfig = _deepFreeze(klona(appConfig));
-function useAppConfig(event) {
-  {
-    return _sharedAppConfig;
-  }
-}
+_deepFreeze(klona(appConfig));
 function _deepFreeze(object) {
   const propNames = Object.getOwnPropertyNames(object);
   for (const name of propNames) {
@@ -527,7 +149,7 @@ new Proxy(/* @__PURE__ */ Object.create(null), {
   }
 });
 
-const serverAssets = [{"baseName":"server","dir":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/server/assets"}];
 
 const assets = createStorage();
 
@@ -535,19 +157,18 @@ for (const asset of serverAssets) {
   assets.mount(asset.baseName, unstorage_47drivers_47fs({ base: asset.dir }));
 }
 
-const storage$1 = createStorage({});
+const storage = createStorage({});
 
-storage$1.mount('/assets', assets);
+storage.mount('/assets', assets);
 
-storage$1.mount('#rate-limiter-storage', unstorage_47drivers_47lru_45cache({"driver":"lruCache"}));
-storage$1.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app","ignore":["**/node_modules/**","**/.git/**"]}));
-storage$1.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/server","ignore":["**/node_modules/**","**/.git/**"]}));
-storage$1.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.nuxt","ignore":["**/node_modules/**","**/.git/**"]}));
-storage$1.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.nuxt/cache","ignore":["**/node_modules/**","**/.git/**"]}));
-storage$1.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.data/kv","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/server","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/.nuxt","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/.nuxt/cache","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/.data/kv","ignore":["**/node_modules/**","**/.git/**"]}));
 
 function useStorage(base = "") {
-  return base ? prefixStorage(storage$1, base) : storage$1;
+  return base ? prefixStorage(storage, base) : storage;
 }
 
 const defaultCacheOptions = {
@@ -1000,7 +621,7 @@ const _unIJFZcz2u = (function(nitro) {
   });
 });
 
-const rootDir = "/Users/markustratschitt/Repositories/Nuxt_Dockerized/app";
+const rootDir = "/Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 
@@ -1088,9 +709,10 @@ function onConsoleLog(callback) {
   consola.wrapConsole();
 }
 
-function defineNitroPlugin(def) {
-  return def;
-}
+const plugins = [
+  _unIJFZcz2u,
+_2yqFywGLOx
+];
 
 const scheduledTasks = false;
 
@@ -1160,422 +782,6 @@ function defineRenderHandler(handler) {
   });
 }
 
-function buildAssetsDir() {
-  return useRuntimeConfig().app.buildAssetsDir;
-}
-function buildAssetsURL(...path) {
-  return joinRelativeURL(publicAssetsURL(), buildAssetsDir(), ...path);
-}
-function publicAssetsURL(...path) {
-  const app = useRuntimeConfig().app;
-  const publicBase = app.cdnURL || app.baseURL;
-  return path.length ? joinRelativeURL(publicBase, ...path) : publicBase;
-}
-
-const defuReplaceArray = createDefu((obj, key, value) => {
-  if (Array.isArray(obj[key]) || Array.isArray(value)) {
-    obj[key] = value;
-    return true;
-  }
-});
-
-const nitroAppSecurityOptions = {};
-function getAppSecurityOptions() {
-  return nitroAppSecurityOptions;
-}
-function resolveSecurityRules(event) {
-  if (!event.context.security) {
-    event.context.security = {};
-  }
-  if (!event.context.security.rules) {
-    const router = createRouter({ routes: structuredClone(nitroAppSecurityOptions) });
-    const matcher = toRouteMatcher(router);
-    const matches = matcher.matchAll(event.path.split("?")[0]);
-    const rules = defuReplaceArray({}, ...matches.reverse());
-    event.context.security.rules = rules;
-  }
-  return event.context.security.rules;
-}
-function resolveSecurityRoute(event) {
-  if (!event.context.security) {
-    event.context.security = {};
-  }
-  if (!event.context.security.route) {
-    const routeNames = Object.fromEntries(Object.entries(nitroAppSecurityOptions).map(([name]) => [name, { name }]));
-    const router = createRouter({ routes: routeNames });
-    const match = router.lookup(event.path.split("?")[0]);
-    const route = match?.name ?? "";
-    event.context.security.route = route;
-  }
-  return event.context.security.route;
-}
-
-const KEYS_TO_NAMES = {
-  contentSecurityPolicy: "Content-Security-Policy",
-  crossOriginEmbedderPolicy: "Cross-Origin-Embedder-Policy",
-  crossOriginOpenerPolicy: "Cross-Origin-Opener-Policy",
-  crossOriginResourcePolicy: "Cross-Origin-Resource-Policy",
-  originAgentCluster: "Origin-Agent-Cluster",
-  referrerPolicy: "Referrer-Policy",
-  strictTransportSecurity: "Strict-Transport-Security",
-  xContentTypeOptions: "X-Content-Type-Options",
-  xDNSPrefetchControl: "X-DNS-Prefetch-Control",
-  xDownloadOptions: "X-Download-Options",
-  xFrameOptions: "X-Frame-Options",
-  xPermittedCrossDomainPolicies: "X-Permitted-Cross-Domain-Policies",
-  xXSSProtection: "X-XSS-Protection",
-  permissionsPolicy: "Permissions-Policy"
-};
-const NAMES_TO_KEYS = Object.fromEntries(Object.entries(KEYS_TO_NAMES).map(([key, name]) => [name, key]));
-function getNameFromKey(key) {
-  return KEYS_TO_NAMES[key];
-}
-function getKeyFromName(headerName) {
-  const [, key] = Object.entries(NAMES_TO_KEYS).find(([name]) => name.toLowerCase() === headerName.toLowerCase()) || [];
-  return key;
-}
-function headerStringFromObject(optionKey, optionValue) {
-  if (optionValue === false) {
-    return "";
-  }
-  if (optionKey === "contentSecurityPolicy") {
-    const policies = optionValue;
-    return Object.entries(policies).filter(([, value]) => value !== false).map(([directive, sources]) => {
-      if (directive === "upgrade-insecure-requests") {
-        return "upgrade-insecure-requests;";
-      } else {
-        const stringifiedSources = typeof sources === "string" ? sources : sources.map((source) => source.trim()).join(" ");
-        return `${directive} ${stringifiedSources};`;
-      }
-    }).join(" ");
-  } else if (optionKey === "strictTransportSecurity") {
-    const policies = optionValue;
-    return [
-      `max-age=${policies.maxAge};`,
-      policies.includeSubdomains && "includeSubDomains;",
-      policies.preload && "preload;"
-    ].filter(Boolean).join(" ");
-  } else if (optionKey === "permissionsPolicy") {
-    const policies = optionValue;
-    return Object.entries(policies).filter(([, value]) => value !== false).map(([directive, sources]) => {
-      if (typeof sources === "string") {
-        return `${directive}=${sources}`;
-      } else {
-        return `${directive}=(${sources.join(" ")})`;
-      }
-    }).join(", ");
-  } else {
-    return optionValue;
-  }
-}
-function headerObjectFromString(optionKey, headerValue) {
-  if (!headerValue) {
-    return false;
-  }
-  if (optionKey === "contentSecurityPolicy") {
-    const directives = headerValue.split(";").map((directive) => directive.trim()).filter((directive) => directive);
-    const objectForm = {};
-    for (const directive of directives) {
-      const [type, ...sources] = directive.split(" ").map((token) => token.trim());
-      if (type === "upgrade-insecure-requests") {
-        objectForm[type] = true;
-      } else {
-        objectForm[type] = sources.join(" ");
-      }
-    }
-    return objectForm;
-  } else if (optionKey === "strictTransportSecurity") {
-    const directives = headerValue.split(";").map((directive) => directive.trim()).filter((directive) => directive);
-    const objectForm = {};
-    for (const directive of directives) {
-      const [type, value] = directive.split("=").map((token) => token.trim());
-      if (type === "max-age") {
-        objectForm.maxAge = Number(value);
-      } else if (type === "includeSubdomains" || type === "preload") {
-        objectForm[type] = true;
-      }
-    }
-    return objectForm;
-  } else if (optionKey === "permissionsPolicy") {
-    const directives = headerValue.split(",").map((directive) => directive.trim()).filter((directive) => directive);
-    const objectForm = {};
-    for (const directive of directives) {
-      const [type, value] = directive.split("=").map((token) => token.trim());
-      objectForm[type] = value;
-    }
-    return objectForm;
-  } else {
-    return headerValue;
-  }
-}
-function standardToSecurity(standardHeaders) {
-  if (!standardHeaders) {
-    return void 0;
-  }
-  const standardHeadersAsObject = {};
-  Object.entries(standardHeaders).forEach(([headerName, headerValue]) => {
-    const optionKey = getKeyFromName(headerName);
-    if (optionKey) {
-      if (typeof headerValue === "string") {
-        const objectValue = headerObjectFromString(optionKey, headerValue);
-        standardHeadersAsObject[optionKey] = objectValue;
-      } else {
-        standardHeadersAsObject[optionKey] = headerValue;
-      }
-    }
-  });
-  if (Object.keys(standardHeadersAsObject).length === 0) {
-    return void 0;
-  }
-  return standardHeadersAsObject;
-}
-function backwardsCompatibleSecurity(securityHeaders) {
-  if (!securityHeaders) {
-    return void 0;
-  }
-  const securityHeadersAsObject = {};
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    const optionKey = key;
-    if ((optionKey === "contentSecurityPolicy" || optionKey === "permissionsPolicy" || optionKey === "strictTransportSecurity") && typeof value === "string") {
-      const objectValue = headerObjectFromString(optionKey, value);
-      securityHeadersAsObject[optionKey] = objectValue;
-    } else if (value === "") {
-      securityHeadersAsObject[optionKey] = false;
-    } else {
-      securityHeadersAsObject[optionKey] = value;
-    }
-  });
-  return securityHeadersAsObject;
-}
-
-const _gKP7933MVt = defineNitroPlugin(async (nitroApp) => {
-  const appSecurityOptions = getAppSecurityOptions();
-  const runtimeConfig = useRuntimeConfig();
-  for (const route in runtimeConfig.nitro.routeRules) {
-    const rule = runtimeConfig.nitro.routeRules[route];
-    const { headers: headers2 } = rule;
-    const securityHeaders2 = standardToSecurity(headers2);
-    if (securityHeaders2) {
-      appSecurityOptions[route] = { headers: securityHeaders2 };
-    }
-  }
-  const securityOptions = runtimeConfig.security;
-  const { headers } = securityOptions;
-  const securityHeaders = backwardsCompatibleSecurity(headers);
-  appSecurityOptions["/**"] = defuReplaceArray(
-    { headers: securityHeaders },
-    securityOptions,
-    appSecurityOptions["/**"]
-  );
-  for (const route in runtimeConfig.nitro.routeRules) {
-    const rule = runtimeConfig.nitro.routeRules[route];
-    const { security } = rule;
-    if (security) {
-      const { headers: headers2 } = security;
-      const securityHeaders2 = backwardsCompatibleSecurity(headers2);
-      appSecurityOptions[route] = defuReplaceArray(
-        { headers: securityHeaders2 },
-        security,
-        appSecurityOptions[route]
-      );
-    }
-  }
-  nitroApp.hooks.hook("nuxt-security:headers", ({ route, headers: headers2 }) => {
-    appSecurityOptions[route] = defuReplaceArray(
-      { headers: headers2 },
-      appSecurityOptions[route]
-    );
-  });
-  nitroApp.hooks.hook("nuxt-security:ready", async () => {
-    await nitroApp.hooks.callHook("nuxt-security:routeRules", appSecurityOptions);
-  });
-  await nitroApp.hooks.callHook("nuxt-security:ready");
-});
-
-const sriHashes = {"/_nuxt/builds/meta/836d03ea-23de-48ce-af68-3f0507847f87.json":"sha384-Bq1qtqTvRVdUQY0rdQ2nxpBWiyTuG+LUWkl+i4Bln5OJ4+/uaICAJJi/A2fSTOVy","/_nuxt/builds/meta/dev.json":"sha384-0nREtZW4ymyvlLs+6KmFqdNoe4yCv11bNXuFu5t3TOBWY4tifdjLylJ+rBDEtkjR","/_nuxt/builds/latest.json":"sha384-ukH+ykBIZnNzIyFGCW+bmBerxyqCzKaH0KYDrC/C5zlRk2xxJLVw+mIFpR2ZjveH","/favicon.ico":"sha384-udbcbVSoJ0jynxYo+FKdhmcYDst1ze6s6rkgFExSYfpX6tAuGn5whsHNjmcRr4eU","/robots.txt":"sha384-7GZOiJ7WwbJ2PKz3iZ2Vt/NHNz65guUjQZ/uo6o2LYkbO/Al8pImelhUBJCReJw+"};
-
-const SCRIPT_RE$1 = /<script((?=[^>]+\bsrc="([^"]+)")(?![^>]+\bintegrity="[^"]+")[^>]+)(?:\/>|><\/script>)/g;
-const LINK_RE$1 = /<link((?=[^>]+\brel="(?:stylesheet|preload|modulepreload)")(?=[^>]+\bhref="([^"]+)")(?![^>]+\bintegrity="[\w\-+/=]+")[^>]+)>/g;
-const _zHY8c3HXtr = defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook("render:html", (html, { event }) => {
-    const rules = resolveSecurityRules(event);
-    if (!rules.enabled || !rules.sri) {
-      return;
-    }
-    const sections = ["body", "bodyAppend", "bodyPrepend", "head"];
-    for (const section of sections) {
-      html[section] = html[section].map((element) => {
-        element = element.replace(SCRIPT_RE$1, (match, rest, src) => {
-          const hash = sriHashes[src];
-          if (hash) {
-            const integrityScript = `<script integrity="${hash}"${rest}><\/script>`;
-            return integrityScript;
-          } else {
-            return match;
-          }
-        });
-        element = element.replace(LINK_RE$1, (match, rest, href) => {
-          const hash = sriHashes[href];
-          if (hash) {
-            const integrityLink = `<link integrity="${hash}"${rest}>`;
-            return integrityLink;
-          } else {
-            return match;
-          }
-        });
-        return element;
-      });
-    }
-  });
-});
-
-const _jTopbk6pOI = defineNitroPlugin((nitroApp) => {
-  {
-    return;
-  }
-});
-
-const LINK_RE = /<link([^>]*?>)/gi;
-const SCRIPT_RE = /<script([^>]*?>)/gi;
-const STYLE_RE = /<style([^>]*?>)/gi;
-const _wK4rqLLoXQ = defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook("request", (event) => {
-    const rules = resolveSecurityRules(event);
-    if (rules.enabled && rules.nonce && !false) {
-      const nonce = crypto.randomBytes(16).toString("base64");
-      event.context.security.nonce = nonce;
-    }
-  });
-  nitroApp.hooks.hook("render:html", (html, { event }) => {
-    const rules = resolveSecurityRules(event);
-    if (!rules.enabled || !rules.headers || !rules.headers.contentSecurityPolicy || !rules.nonce) {
-      return;
-    }
-    const nonce = event.context.security.nonce;
-    const sections = ["body", "bodyAppend", "bodyPrepend", "head"];
-    for (const section of sections) {
-      html[section] = html[section].map((element) => {
-        element = element.replace(LINK_RE, (match, rest) => {
-          return `<link nonce="${nonce}"` + rest;
-        });
-        element = element.replace(SCRIPT_RE, (match, rest) => {
-          return `<script nonce="${nonce}"` + rest;
-        });
-        element = element.replace(STYLE_RE, (match, rest) => {
-          return `<style nonce="${nonce}"` + rest;
-        });
-        return element;
-      });
-    }
-  });
-});
-
-const _aWUrME7jgb = defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook("render:html", (response, { event }) => {
-    const rules = resolveSecurityRules(event);
-    if (rules.enabled && rules.headers) {
-      const headers = rules.headers;
-      if (headers.contentSecurityPolicy) {
-        const csp = headers.contentSecurityPolicy;
-        const nonce = event.context.security?.nonce;
-        const scriptHashes = event.context.security?.hashes?.script;
-        const styleHashes = event.context.security?.hashes?.style;
-        headers.contentSecurityPolicy = updateCspVariables(csp, nonce, scriptHashes, styleHashes);
-      }
-    }
-  });
-});
-function updateCspVariables(csp, nonce, scriptHashes, styleHashes) {
-  const generatedCsp = Object.fromEntries(Object.entries(csp).map(([directive, value]) => {
-    if (typeof value === "boolean") {
-      return [directive, value];
-    }
-    const sources = typeof value === "string" ? value.split(" ").map((token) => token.trim()).filter((token) => token) : value;
-    const modifiedSources = sources.filter((source) => !source.startsWith("'nonce-") || source === "'nonce-{{nonce}}'").map((source) => {
-      if (source === "'nonce-{{nonce}}'") {
-        return nonce ? `'nonce-${nonce}'` : "";
-      } else {
-        return source;
-      }
-    }).filter((source) => source);
-    if (directive === "script-src" && scriptHashes) {
-      modifiedSources.push(...scriptHashes);
-    }
-    if (directive === "style-src" && styleHashes) {
-      modifiedSources.push(...styleHashes);
-    }
-    return [directive, modifiedSources];
-  }));
-  return generatedCsp;
-}
-
-const _CvhvHUyEDH = defineNitroPlugin((nitroApp) => {
-  {
-    return;
-  }
-});
-
-const _zUgIZOSjBL = defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook("render:response", (response, { event }) => {
-    const rules = resolveSecurityRules(event);
-    if (rules.enabled && rules.headers) {
-      const headers = rules.headers;
-      Object.entries(headers).forEach(([header, value]) => {
-        const headerName = getNameFromKey(header);
-        if (value === false) {
-          const { headers: standardHeaders } = getRouteRules(event);
-          const standardHeaderValue = standardHeaders?.[headerName];
-          const currentHeaderValue = getResponseHeader(event, headerName);
-          if (standardHeaderValue === currentHeaderValue) {
-            removeResponseHeader(event, headerName);
-          }
-        } else {
-          const headerValue = headerStringFromObject(header, value);
-          setResponseHeader(event, headerName, headerValue);
-        }
-      });
-    }
-  });
-});
-
-const _fIHj6fi3r4 = defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook("beforeResponse", (event) => {
-    const rules = resolveSecurityRules(event);
-    if (rules.enabled && rules.hidePoweredBy && !event.node.res.headersSent) {
-      removeResponseHeader(event, "x-powered-by");
-    }
-  });
-});
-
-const _vdUD17M2uv = defineNitroPlugin(async (nitroApp) => {
-  {
-    const prerenderedHeaders = await useStorage("assets:nuxt-security").getItem("headers.json") || {};
-    nitroApp.hooks.hook("beforeResponse", (event) => {
-      const rules = resolveSecurityRules(event);
-      if (rules.enabled && rules.ssg && rules.ssg.nitroHeaders) {
-        const path = event.path.split("?")[0];
-        if (prerenderedHeaders[path]) {
-          setResponseHeaders(event, prerenderedHeaders[path]);
-        }
-      }
-    });
-  }
-});
-
-const plugins = [
-  _unIJFZcz2u,
-_2yqFywGLOx,
-_gKP7933MVt,
-_zHY8c3HXtr,
-_jTopbk6pOI,
-_wK4rqLLoXQ,
-_aWUrME7jgb,
-_CvhvHUyEDH,
-_zUgIZOSjBL,
-_fIHj6fi3r4,
-_vdUD17M2uv
-];
-
 const errorHandler = (async function errorhandler(error, event) {
   const { stack, statusCode, statusMessage, message } = normalizeError(error);
   const errorObject = {
@@ -1636,345 +842,58 @@ const errorHandler = (async function errorhandler(error, event) {
   return send(event, html);
 });
 
-const warnOnceSet = /* @__PURE__ */ new Set();
-const DEFAULT_ENDPOINT = "https://api.iconify.design";
-const _OzhQ2z = defineCachedEventHandler(async (event) => {
-  const url = event.node.req.url;
-  if (!url)
-    return;
-  const options = useAppConfig().icon;
-  const collectionName = event.context.params?.collection?.replace(/\.json$/, "");
-  const collection = collectionName ? await collections[collectionName]?.() : null;
-  const apiEndPoint = options.iconifyApiEndpoint || DEFAULT_ENDPOINT;
-  const apiUrl = new URL("./" + basename(url), apiEndPoint);
-  const icons = apiUrl.searchParams.get("icons")?.split(",");
-  if (collection) {
-    if (icons?.length) {
-      const data = getIcons(
-        collection,
-        icons
-      );
-      consola.debug(`[Icon] serving ${(icons || []).map((i) => "`" + collectionName + ":" + i + "`").join(",")} from bundled collection`);
-      return data;
-    }
-  } else {
-    if (collectionName && !warnOnceSet.has(collectionName) && apiEndPoint === DEFAULT_ENDPOINT) {
-      consola.warn([
-        `[Icon] Collection \`${collectionName}\` is not found locally`,
-        `We suggest to install it via \`npm i -D @iconify-json/${collectionName}\` to provide the best end-user experience.`
-      ].join("\n"));
-      warnOnceSet.add(collectionName);
-    }
+const sessionStore = {};
+const authMiddleware = defineEventHandler(async (event) => {
+  const sessionId = getCookie(event, "sessionId");
+  if (!sessionId || !sessionStore[sessionId]) {
+    return sendError(event, createError({ statusCode: 401, statusMessage: "Unauthorized" }));
   }
-  if (options.fallbackToApi) {
-    consola.debug(`[Icon] fetching ${(icons || []).map((i) => "`" + collectionName + ":" + i + "`").join(",")} from iconify api`);
-    if (apiUrl.host !== new URL(apiEndPoint).host) {
-      return createError({ status: 400, message: "Invalid icon request" });
-    }
-    try {
-      const data = await $fetch(apiUrl.href);
-      return data;
-    } catch (e) {
-      console.error(e);
-      return createError({ status: 404 });
-    }
-  }
-  return createError({ status: 404 });
-}, {
-  group: "nuxt",
-  name: "icon",
-  getKey(event) {
-    const collection = event.context.params?.collection?.replace(/\.json$/, "") || "unknown";
-    const icons = String(getQuery$1(event).icons || "").split(",");
-    return `${collection}_${icons.join("_")}`;
-  },
-  swr: true,
-  maxAge: 60 * 60 * 24 * 7
-  // 1 week
+  const user = sessionStore[sessionId];
+  event.context.user = user;
 });
 
-const defaultThrowErrorValue = { throwError: true };
-const defaultSecurityConfig = (serverlUrl, strict) => {
-  const defaultConfig = {
-    strict,
-    headers: {
-      crossOriginResourcePolicy: "same-origin",
-      crossOriginOpenerPolicy: "same-origin",
-      crossOriginEmbedderPolicy: "credentialless",
-      contentSecurityPolicy: {
-        "base-uri": ["'none'"],
-        "font-src": ["'self'", "https:", "data:"],
-        "form-action": ["'self'"],
-        "frame-ancestors": ["'self'"],
-        "img-src": ["'self'", "data:"],
-        "object-src": ["'none'"],
-        "script-src-attr": ["'none'"],
-        "style-src": ["'self'", "https:", "'unsafe-inline'"],
-        "script-src": ["'self'", "https:", "'unsafe-inline'", "'strict-dynamic'", "'nonce-{{nonce}}'"],
-        "upgrade-insecure-requests": true
-      },
-      originAgentCluster: "?1",
-      referrerPolicy: "no-referrer",
-      strictTransportSecurity: {
-        maxAge: 15552e3,
-        includeSubdomains: true
-      },
-      xContentTypeOptions: "nosniff",
-      xDNSPrefetchControl: "off",
-      xDownloadOptions: "noopen",
-      xFrameOptions: "SAMEORIGIN",
-      xPermittedCrossDomainPolicies: "none",
-      xXSSProtection: "0",
-      permissionsPolicy: {
-        camera: [],
-        "display-capture": [],
-        fullscreen: [],
-        geolocation: [],
-        microphone: []
-      }
-    },
-    requestSizeLimiter: {
-      maxRequestSizeInBytes: 2e6,
-      maxUploadFileRequestInBytes: 8e6,
-      ...defaultThrowErrorValue
-    },
-    rateLimiter: {
-      // Twitter search rate limiting
-      tokensPerInterval: 150,
-      interval: 3e5,
-      headers: false,
-      driver: {
-        name: "lruCache"
-      },
-      ...defaultThrowErrorValue
-    },
-    xssValidator: {
-      methods: ["GET", "POST"],
-      ...defaultThrowErrorValue
-    },
-    corsHandler: {
-      // Options by CORS middleware for Express https://github.com/expressjs/cors#configuration-options
-      origin: serverlUrl,
-      methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-      preflight: {
-        statusCode: 204
-      }
-    },
-    allowedMethodsRestricter: {
-      methods: "*",
-      ...defaultThrowErrorValue
-    },
-    hidePoweredBy: true,
-    basicAuth: false,
-    enabled: true,
-    csrf: false,
-    nonce: true,
-    // https://github.com/Talljack/unplugin-remove/blob/main/src/types.ts
-    removeLoggers: {
-      external: [],
-      consoleType: ["log", "debug"],
-      include: [/\.[jt]sx?$/, /\.vue\??/],
-      exclude: [/node_modules/, /\.git/]
-    },
-    ssg: {
-      meta: true,
-      hashScripts: true,
-      hashStyles: false,
-      nitroHeaders: true,
-      exportToPresets: true
-    },
-    sri: true
-  };
-  return defaultConfig;
-};
+const useSessionX = (event) => useSessionX(event, useRuntimeConfig().session);
 
-const FILE_UPLOAD_HEADER = "multipart/form-data";
-const defaultSizeLimiter = defaultSecurityConfig("").requestSizeLimiter;
-const _1WAuSr = defineEventHandler((event) => {
-  const rules = resolveSecurityRules(event);
-  if (rules.enabled && rules.requestSizeLimiter) {
-    const requestSizeLimiter = defu(
-      rules.requestSizeLimiter,
-      defaultSizeLimiter
-    );
-    if (["POST", "PUT", "DELETE"].includes(event.node.req.method)) {
-      const contentLengthValue = getRequestHeader(event, "content-length");
-      const contentTypeValue = getRequestHeader(event, "content-type");
-      const isFileUpload = contentTypeValue?.includes(FILE_UPLOAD_HEADER);
-      const requestLimit = isFileUpload ? requestSizeLimiter.maxUploadFileRequestInBytes : requestSizeLimiter.maxRequestSizeInBytes;
-      if (parseInt(contentLengthValue) >= requestLimit) {
-        const payloadTooLargeError = {
-          statusCode: 413,
-          statusMessage: "Payload Too Large"
-        };
-        if (requestSizeLimiter.throwError === false) {
-          return payloadTooLargeError;
-        }
-        throw createError(payloadTooLargeError);
-      }
+const _9rzr2O = defineEventHandler(async (event) => {
+  let session = await useSessionX(event);
+  console.log("New request: " + getRequestURL(event), session.data);
+});
+
+const _8VAOvK = defineEventHandler(async (event) => {
+  const session = await useSession(event, {
+    password: "your_secure_session_password",
+    // Secure password for session encryption
+    cookie: {
+      httpOnly: true,
+      // Cookie can only be accessed by the server, preventing client-side access (security measure)
+      maxAge: 60 * 60 * 24 * 365,
+      // Set cookie expiration to 1 year
+      secure: false
+      // Use secure cookies (HTTPS) in production environments
     }
-  }
+  });
+  event.context.session = session;
 });
 
-const _zQE8JS = defineEventHandler((event) => {
-  const rules = resolveSecurityRules(event);
-  if (rules.enabled && rules.corsHandler) {
-    const { corsHandler } = rules;
-    handleCors(event, corsHandler);
-  }
-});
-
-const _UcgbE5 = defineEventHandler((event) => {
-  const rules = resolveSecurityRules(event);
-  if (rules.enabled && rules.allowedMethodsRestricter) {
-    const { allowedMethodsRestricter } = rules;
-    const allowedMethods = allowedMethodsRestricter.methods;
-    if (allowedMethods !== "*" && !allowedMethods.includes(event.node.req.method)) {
-      const methodNotAllowedError = {
-        statusCode: 405,
-        statusMessage: "Method not allowed"
-      };
-      if (allowedMethodsRestricter.throwError === false) {
-        return methodNotAllowedError;
-      }
-      throw createError(methodNotAllowedError);
-    }
-  }
-});
-
-const storage = useStorage("#rate-limiter-storage");
-const defaultRateLimiter = defaultSecurityConfig("").rateLimiter;
-const _RGWJry = defineEventHandler(async (event) => {
-  const rules = resolveSecurityRules(event);
-  const route = resolveSecurityRoute(event);
-  if (rules.enabled && rules.rateLimiter) {
-    const rateLimiter = defu(
-      rules.rateLimiter,
-      defaultRateLimiter
-    );
-    const ip = getIP(event);
-    const url = ip + route;
-    let storageItem = await storage.getItem(url);
-    if (!storageItem) {
-      await setStorageItem(rateLimiter, url);
-    } else {
-      if (typeof storageItem !== "object") {
-        return;
-      }
-      const timeSinceFirstRateLimit = storageItem.date;
-      const timeForInterval = storageItem.date + Number(rateLimiter.interval);
-      if (Date.now() >= timeForInterval) {
-        await setStorageItem(rateLimiter, url);
-        storageItem = await storage.getItem(url);
-      }
-      const isLimited = timeSinceFirstRateLimit <= timeForInterval && storageItem.value === 0;
-      if (isLimited) {
-        const tooManyRequestsError = {
-          statusCode: 429,
-          statusMessage: "Too Many Requests"
-        };
-        if (rules.rateLimiter.headers) {
-          setResponseHeader(event, "x-ratelimit-remaining", 0);
-          setResponseHeader(event, "x-ratelimit-limit", rateLimiter.tokensPerInterval);
-          setResponseHeader(event, "x-ratelimit-reset", timeForInterval);
-        }
-        if (rateLimiter.throwError === false) {
-          return tooManyRequestsError;
-        }
-        throw createError(tooManyRequestsError);
-      }
-      const newItemDate = timeSinceFirstRateLimit > timeForInterval ? Date.now() : storageItem.date;
-      const newStorageItem = { value: storageItem.value - 1, date: newItemDate };
-      await storage.setItem(url, newStorageItem);
-      const currentItem = await storage.getItem(url);
-      if (currentItem && rateLimiter.headers) {
-        setResponseHeader(event, "x-ratelimit-remaining", currentItem.value);
-        setResponseHeader(event, "x-ratelimit-limit", rateLimiter.tokensPerInterval);
-        setResponseHeader(event, "x-ratelimit-reset", timeForInterval);
-      }
-    }
-  }
-});
-async function setStorageItem(rateLimiter, url) {
-  const rateLimitedObject = { value: rateLimiter.tokensPerInterval, date: Date.now() };
-  await storage.setItem(url, rateLimitedObject);
-}
-function getIP(event) {
-  const ip = getRequestIP(event, { xForwardedFor: true }) || "";
-  return ip;
-}
-
-const _dg6hx7 = defineEventHandler(async (event) => {
-  const rules = resolveSecurityRules(event);
-  if (rules.enabled && rules.xssValidator) {
-    const filterOpt = {
-      ...rules.xssValidator,
-      escapeHtml: void 0
-    };
-    if (rules.xssValidator.escapeHtml === false) {
-      filterOpt.escapeHtml = (value) => value;
-    }
-    const xssValidator = new FilterXSS(filterOpt);
-    if (event.node.req.socket.readyState !== "readOnly") {
-      if (rules.xssValidator.methods && rules.xssValidator.methods.includes(
-        event.node.req.method
-      )) {
-        const valueToFilter = event.node.req.method === "GET" ? getQuery$1(event) : event.node.req.headers["content-type"]?.includes(
-          "multipart/form-data"
-        ) ? await readMultipartFormData(event) : await readBody(event);
-        if (valueToFilter && Object.keys(valueToFilter).length) {
-          if (valueToFilter.statusMessage && valueToFilter.statusMessage !== "Bad Request") {
-            return;
-          }
-          const stringifiedValue = JSON.stringify(valueToFilter);
-          const processedValue = xssValidator.process(
-            JSON.stringify(valueToFilter)
-          );
-          if (processedValue !== stringifiedValue) {
-            const badRequestError = {
-              statusCode: 400,
-              statusMessage: "Bad Request"
-            };
-            if (rules.xssValidator.throwError === false) {
-              return badRequestError;
-            }
-            throw createError(badRequestError);
-          }
-        }
-      }
-    }
-  }
-});
-
-const _0PjE6R = lazyEventHandler(() => {
-  const opts = useRuntimeConfig().ipx || {};
-  const fsDir = opts?.fs?.dir ? (Array.isArray(opts.fs.dir) ? opts.fs.dir : [opts.fs.dir]).map((dir) => isAbsolute(dir) ? dir : fileURLToPath(new URL(dir, globalThis._importMeta_.url))) : void 0;
-  const fsStorage = opts.fs?.dir ? ipxFSStorage({ ...opts.fs, dir: fsDir }) : void 0;
-  const httpStorage = opts.http?.domains ? ipxHttpStorage({ ...opts.http }) : void 0;
-  if (!fsStorage && !httpStorage) {
-    throw new Error("IPX storage is not configured!");
-  }
-  const ipxOptions = {
-    ...opts,
-    storage: fsStorage || httpStorage,
-    httpStorage
-  };
-  const ipx = createIPX(ipxOptions);
-  const ipxHandler = createIPXH3Handler(ipx);
-  return useBase(opts.baseURL, ipxHandler);
-});
-
+const _lazy_ziCXF6 = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_sJxI6A = () => Promise.resolve().then(function () { return login$1; });
+const _lazy_J77uvY = () => Promise.resolve().then(function () { return _protected$1; });
+const _lazy_5oLGLm = () => Promise.resolve().then(function () { return bar_get$1; });
+const _lazy_5AH41C = () => Promise.resolve().then(function () { return foo_get$1; });
+const _lazy_6rYQps = () => Promise.resolve().then(function () { return testDb$1; });
 const _lazy_maJPtv = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
+  { route: '', handler: authMiddleware, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _9rzr2O, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _8VAOvK, lazy: false, middleware: true, method: undefined },
+  { route: '/api/auth/login', handler: _lazy_ziCXF6, lazy: true, middleware: false, method: "post" },
+  { route: '/api/login', handler: _lazy_sJxI6A, lazy: true, middleware: false, method: undefined },
+  { route: '/api/protected', handler: _lazy_J77uvY, lazy: true, middleware: false, method: undefined },
+  { route: '/api/session/bar', handler: _lazy_5oLGLm, lazy: true, middleware: false, method: "get" },
+  { route: '/api/session/foo', handler: _lazy_5AH41C, lazy: true, middleware: false, method: "get" },
+  { route: '/api/test-db', handler: _lazy_6rYQps, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_error', handler: _lazy_maJPtv, lazy: true, middleware: false, method: undefined },
-  { route: '/api/_nuxt_icon/:collection', handler: _OzhQ2z, lazy: false, middleware: false, method: undefined },
-  { route: '', handler: _1WAuSr, lazy: false, middleware: false, method: undefined },
-  { route: '', handler: _zQE8JS, lazy: false, middleware: false, method: undefined },
-  { route: '', handler: _UcgbE5, lazy: false, middleware: false, method: undefined },
-  { route: '', handler: _RGWJry, lazy: false, middleware: false, method: undefined },
-  { route: '', handler: _dg6hx7, lazy: false, middleware: false, method: undefined },
-  { route: '/_ipx/**', handler: _0PjE6R, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_maJPtv, lazy: true, middleware: false, method: undefined }
 ];
 
@@ -2170,6 +1089,113 @@ const errorDev = /*#__PURE__*/Object.freeze({
   template: template$1
 });
 
+const prisma$1 = new PrismaClient();
+const login_post = defineEventHandler(async (event) => {
+  const { username, password } = await readBody(event);
+  const user = await prisma$1.$queryRaw`SELECT * FROM user WHERE username = ${username}`;
+  if (!user) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+  const session = event.context.session;
+  session.data.user = { id: user.id, username: user.username, role: user.role };
+  return { message: "Login erfolgreich", user: session.data.user };
+});
+
+const login_post$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: login_post
+});
+
+const login = defineEventHandler(async (event) => {
+  await useBody();
+  const user = { userId: "123", username: "user123" };
+  const sessionId = Math.random().toString(36).substring(2);
+  setCookie(event, "session_id", sessionId, { httpOnly: true, path: "/" });
+  return { message: "Login erfolgreich", user };
+});
+function useBody(event) {
+  throw new Error("Function not implemented.");
+}
+
+const login$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: login
+});
+
+const _protected = defineEventHandler(async (event) => {
+  const user = event.context.user;
+  if (!user) {
+    return sendError(event, createError({ statusCode: 403, statusMessage: "Unauthorized" }));
+  }
+  return {
+    message: "Hallo, ${user.username"
+  };
+});
+
+const _protected$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: _protected
+});
+
+const bar_get = eventHandler(async (event) => {
+  var _a, _b;
+  const session = await useSessionX(event);
+  await session.update({ ctr: Number(session.data.ctr || 0) - 1 });
+  console.log("/api/session/bar", (_a = event.context.sessions) == null ? void 0 : _a.id);
+  return {
+    route: "/api/session/bar",
+    session,
+    sessId: (_b = event.context.sessions) == null ? void 0 : _b.id
+  };
+});
+
+const bar_get$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: bar_get
+});
+
+const foo_get = eventHandler(async (event) => {
+  var _a, _b;
+  const session = await useSessionX(event);
+  await session.update({ ctr: 20 });
+  console.log("/api/session/foo", (_a = event.context.sessions) == null ? void 0 : _a.id);
+  return {
+    route: "/api/session/foo",
+    session,
+    sessId: (_b = event.context.sessions) == null ? void 0 : _b.id
+  };
+});
+
+const foo_get$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: foo_get
+});
+
+const prisma = new PrismaClient();
+const testDb = defineEventHandler(async (event) => {
+  try {
+    const mitarbeiter = await prisma.mitarbeiter.findMany();
+    return {
+      message: "Verbindung zur Datenbank erfolgreich",
+      data: mitarbeiter
+    };
+  } catch (error) {
+    return {
+      message: "Verbindung zur Datenbank fehlgeschlagen",
+      error: error.message
+    };
+  }
+});
+
+const testDb$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: testDb
+});
+
 const Vue3 = version[0] === "3";
 
 function resolveUnref(r) {
@@ -2233,10 +1259,22 @@ const unheadPlugins = true ? [CapoPlugin({ track: true })] : [];
 
 const renderSSRHeadOptions = {"omitLineBreaks":false};
 
+function buildAssetsDir() {
+  return useRuntimeConfig().app.buildAssetsDir;
+}
+function buildAssetsURL(...path) {
+  return joinRelativeURL(publicAssetsURL(), buildAssetsDir(), ...path);
+}
+function publicAssetsURL(...path) {
+  const app = useRuntimeConfig().app;
+  const publicBase = app.cdnURL || app.baseURL;
+  return path.length ? joinRelativeURL(publicBase, ...path) : publicBase;
+}
+
 globalThis.__buildAssetsURL = buildAssetsURL;
 globalThis.__publicAssetsURL = publicAssetsURL;
-const getClientManifest = () => import('file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.nuxt/dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
-const getServerEntry = () => import('file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/.nuxt/dist/server/server.mjs').then((r) => r.default || r);
+const getClientManifest = () => import('file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/.nuxt/dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
+const getServerEntry = () => import('file:///Users/markustratschitt/Repositories/Nuxt_Dockerized/app/backend/.nuxt/dist/server/server.mjs').then((r) => r.default || r);
 const getSSRStyles = lazyCachedFunction(() => Promise.resolve().then(function () { return styles$1; }).then((r) => r.default || r));
 const getSSRRenderer = lazyCachedFunction(async () => {
   const manifest = await getClientManifest();

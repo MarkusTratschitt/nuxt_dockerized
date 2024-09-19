@@ -73,3 +73,7 @@ bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+74fb981762c7   app-backend                 "/entrypoint.sh"         About an hour ago   Up About an hour   0.0.0.0:8000->8000/tcp                       backend
+530c20e55ea2   app-frontend                "/docker-entrypoint.…"   About an hour ago   Up About an hour   0.0.0.0:443->443/tcp, 0.0.0.0:8080->80/tcp   frontend_nginx
+56765f8483ee   mysql:8.0                   "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:3306->3306/tcp, 33060/tcp            mysql_db

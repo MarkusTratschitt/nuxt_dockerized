@@ -1,25 +1,24 @@
 // backend/server/index.ts
-import express from 'express';
+import { createApp, toNodeListener } from 'h3';
 import { createServer } from 'http';
 import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from "./middleware/authMiddleware";
+import authMiddleware from "./middleware/authMiddleware";
 
-const app = express();
+// create h3-app
+const app = createApp();
 const prisma = new PrismaClient();
 
-// Middleware to parse JSON
-app.use(express.json());
-
-// Custom middleware for authentication
+// Middleware for authentication
 app.use(authMiddleware);
 
 // Register API routes
-app.use('/api/auth', require('./api/auth/login.post'));
-
+app.use('/api/auth', defineEventHandler(async (event) => {
+    const body = await readBody(event);
+    return { message: 'Login erfolgreich', user: body }
+}));
 
 // Start the server
-const server = createServer(app);
+const server = createServer(toNodeListener(app));
 server.listen(8000, () => {
     console.log("BackendServer started on http://localhost:8000");
 });
-

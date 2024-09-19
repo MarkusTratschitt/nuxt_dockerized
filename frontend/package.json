@@ -29,6 +29,7 @@
   "devDependencies": {
     "@iconify-json/mdi": "^1.2.0",
     "@iconify-json/uil": "^1.2.0",
+    "@types/crypto-js": "^4.2.2",
     "prisma": "^5.19.1"
   }
 }

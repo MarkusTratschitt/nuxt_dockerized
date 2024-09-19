@@ -95,3 +95,11 @@ model Kommentar {
   Kommentar_Datum        DateTime
   Auftrag                Auftrag? @relation(fields: [Auftrag_ID], references: [Auftrag_ID], onDelete: Cascade)
 }
+
+// User model 
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     String
+}

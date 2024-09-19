@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: null,
+    token: null as string | null, // Update the type to allow null
   }),
   actions: {
     setToken(newToken: string) {
@@ -11,8 +11,12 @@ export const useAuthStore = defineStore('auth', {
       this.token = encryptedToken;
     },
     getToken() {
-      const decryptedToken = CryptoJS.AES.decrypt(this.token, 'secret-key').toString(CryptoJS.enc.Utf8);
-      return decryptedToken;
+    if (this.token === null) {
+        // Handle the case where token is null, e.g., return null or throw an error
+        return null;
+    }
+    const decryptedToken = CryptoJS.AES.decrypt(this.token, 'secret-key').toString(CryptoJS.enc.Utf8);
+    return decryptedToken;
     },
     clearToken() {
       this.token = null;

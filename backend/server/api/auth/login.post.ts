@@ -11,9 +11,9 @@ export default defineEventHandler(async (event: H3Event) => {
   const { username, password } = await readBody(event);
 
   // Fetch user from database using prisma
-  const user = await prisma.user.findUnique({
-    where: { username },
-  });
+  const user = await prisma.$queryRaw`SELECT * FROM user WHERE username = ${username}`;
+
+  // Check if user exists
 
   if (!user) {
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
@@ -31,3 +31,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   return { message: "Login erfolgreich", user: session.data.user };
 });
+function findUnique(arg0: { where: { username: any; }; }) {
+    throw new Error("Function not implemented.");
+}
+
